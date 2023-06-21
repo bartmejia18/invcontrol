@@ -13,6 +13,7 @@ class SaleDetails extends Model
     protected $fillable = [
         'sale_id',
         'product_id',
+        'unit_measurement_id',
         'price',
         'quantity',
         'subtotal'

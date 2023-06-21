@@ -6,6 +6,7 @@ use App\Models\Batch;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleDetails;
+use App\Models\UnitMeasurement;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -75,12 +76,17 @@ class SalesController extends Controller {
 
                 $details = json_decode($request->input('details'),true);
                 foreach ($details as $detail) {
+
+                    $unitMeasurement = UnitMeasurement::find($detail['unitMeasurementId']);
+
                     $batchs = Batch::where('product_id', $detail['productId'])
                                     ->where('stock','>',0)->get();
 
-                    if ($batchs->sum('stock') >= $detail['quantity']) {
+                    $totalQuantitySold = $detail['quantity'] * $unitMeasurement->value;
 
-                        $tempStock = $detail['quantity'];
+                    if ($batchs->sum('stock') >= $totalQuantitySold) {
+
+                        $tempStock = $totalQuantitySold;
         
                         foreach ($batchs as $batch) {
                             if ($tempStock != 0) {
@@ -99,6 +105,7 @@ class SalesController extends Controller {
                         SaleDetails::create([
                             "sale_id" => $newSale->id,
                             "product_id" => $detail['productId'],
+                            "unit_measurement_id" => $detail['unitMeasurementId'],
                             "price" => $detail['price'],
                             "quantity" => $detail['quantity'],
                             "subtotal" => $detail['subtotal']    
@@ -248,8 +255,6 @@ class SalesController extends Controller {
 
         $sales = new Sale();
 
-        
-
         switch ($request->input('type')) {
             case 1:
                 $sales = Sale::where('date', $request->input('startDate'))->get();
@@ -303,9 +308,9 @@ class SalesController extends Controller {
         $saleDetail->map(function($detail, $key) {
             $detail->product = Product::with(
                 'brand:id,name',
-                'presentation:id,presentation',
-                'unitMeasurement:id,unit_measurement'
+                'presentation:id,presentation'
                 )->where('id',$detail->product_id)->first();
+            $detail->unit_measurement = UnitMeasurement::find($detail->unit_measurement_id);
         });
 
         return $saleDetail;

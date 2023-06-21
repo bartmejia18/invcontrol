@@ -31,7 +31,7 @@ class ProductController extends Controller
                     $product->stock = $this->getStockInBatchs($product->id);
                     $product->totalStock = $product->stock->sum('stock');
                     $product->cost = $product->stock->pluck('cost')->first() ? $product->stock->pluck('cost')->first() : 0;
-                    $product->unitMeasurement = $this->getUnitMeasurements($product->id);
+                    $product->unit_measurement = $this->getUnitMeasurements($product->id);
                 });
 
                 $this->statusCode   = 200;
@@ -116,7 +116,7 @@ class ProductController extends Controller
                     ->where('id', $newProduct->id)
                     ->first();
 
-                $product->unitMeasurement = $this->getUnitMeasurements($product->id);
+                $product->unit_measurement = $this->getUnitMeasurements($product->id);
                 $product->totalStock = 0;
 
                 DB::commit();
@@ -218,7 +218,7 @@ class ProductController extends Controller
                     ->where('id', $record->id)
                     ->first();
 
-                $product->unitMeasurement = $this->getUnitMeasurements($product->id);
+                $product->unit_measurement = $this->getUnitMeasurements($product->id);
                 $product->stock = $this->getStockInBatchs($product->id);
                 $product->totalStock = $product->stock->sum('stock');
                 $product->cost = $product->stock->pluck('cost')->first() ? $product->stock->pluck('cost')->first() : 0;
@@ -302,7 +302,7 @@ class ProductController extends Controller
                     $product->stock = $this->getStockInBatchs($product->id);
                     $product->totalStock = $product->stock->sum('stock');
                     $product->cost = $product->stock->pluck('cost')->first() ? $product->stock->pluck('cost')->first() : 0;
-                    $product->unitMeasurement = $this->getUnitMeasurements($product->id);
+                    $product->unit_measurement = $this->getUnitMeasurements($product->id);
                 });
 
                 $this->statusCode   = 200;
@@ -336,6 +336,7 @@ class ProductController extends Controller
        return $productsUnit->map(function($item, $key) {
             return [
                 'price' => $item->price,
+                'unit_measurment_id' => $item->unit_measurement_id,
                 'unit_measurement' => $item->unit_measurement,
                 'value' => $item->value
             ];

@@ -279,8 +279,7 @@ class PurchasesController extends Controller
             $batch = Batch::find($detail->batch_id);
             $batch->product = Product::with(
                 'brand:id,name',
-                'presentation:id,presentation',
-                'unitMeasurement:id,unit_measurement'
+                'presentation:id,presentation'
             )->where('id', $batch->product_id)->first();
             $detail->batch = $batch;
         });
