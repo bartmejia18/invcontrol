@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -29,12 +30,9 @@ class AuthController extends Controller
                 'password' => Hash::make($request->password)
             ]);
 
-            $token  = JWTAuth::fromUser($user);
+            $user->token  = JWTAuth::fromUser($user);
 
-            return response()->json([
-                'user' => $user,
-                'token' => $token
-            ], 201);
+            return new UserResource($user);
        }
     }
 
@@ -54,11 +52,18 @@ class AuthController extends Controller
     }
 
     public function createNewToken($token) {
+        auth()->user()->token = $token;
+        return new UserResource(auth()->user());
+    }
+
+    public function profile() {
+        return new UserResource(auth()->user());
+    }
+
+    public function logout() {
+        auth()->logout();
         return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL()*60,
-            'user' => auth()->user() 
+            'message' => 'User logged out'
         ]);
     }
 }
