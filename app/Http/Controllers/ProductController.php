@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Brand;
+use App\Models\Product;
 use Exception;
 use Illuminate\Http\Request;
 
-class BrandController extends Controller
+class ProductController extends Controller
 {
 
     private $statusCode = 200;
@@ -17,12 +17,12 @@ class BrandController extends Controller
     public function index()
     {
         try {
-            $brands = Brand::all();
-            if ($brands) {
+            $products = Product::all();
+            if ($products) {
                 $this->statusCode   = 200;
                 $this->result       = true;
                 $this->message      = "Registro consultados exitosamente";
-                $this->records      = $brands;
+                $this->records      = $products;
             } else
                 throw new \Exception("No se encontraron registros");
         } catch (\Exception $e) {
@@ -58,22 +58,25 @@ class BrandController extends Controller
     public function store(Request $request)
     {
         try {
-            $newBrand = Brand::create([
-                'name' => $request->input('name')
+            $newProduct = Product::create([
+                'name' => $request->input('name'),
+                'brand_id' => $request->input('brandId'),
+                'presentation_id' => $request->input('presentationId'),
+                'unit_measurement_id' => $request->input('unitMeasurementId')
             ]);
 
-            if (!$newBrand) {
-                throw new \Exception("Ocurrió un problema guardar la marca. Por favor inténtelo nuevamente");
+            if (!$newProduct) {
+                throw new \Exception("Ocurrió un problema guardar el registro. Por favor inténtelo nuevamente");
             } else {
                 $this->statusCode   =   201;
                 $this->result       =   true;
-                $this->message      =   "Se ha registrado correctamente la marca";
-                $this->records      =   $newBrand;
+                $this->message      =   "Se ha guardado correctamente el registro";
+                $this->records      =   $newProduct;
             }
         } catch (\Exception $e) {
             $this->statusCode   =   204;
             $this->result       =   false;
-            $this->message      =   env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al guardar la marca. Por favor inténtelo nuevamente";
+            $this->message      =   env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al guardar el registro. Por favor inténtelo nuevamente";
         } finally {
             $response = [
                 'result'    => $this->result,
@@ -92,7 +95,7 @@ class BrandController extends Controller
      */
     public function show($id)
     {
-        return response()->json(Brand::find($id), $this->statusCode);
+        return response()->json(Product::find($id), $this->statusCode);
     }
 
     /**
@@ -116,12 +119,16 @@ class BrandController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $record = Brand::find($id);
+            $record = Product::find($id);
             $record->name = $request->input('name', $record->name);
+            $record->brand_id = $request->input('brandId', $record->brand_id);
+            $record->presentation_id = $request->input('presentationId', $record->presentation_id);
+            $record->unit_measurement_id = $request->input('unitMeasurementId', $record->unit_measurement_id);
+
             if ($record->save()) {
                 $this->statusCode   =   201;
                 $this->result       =   true;
-                $this->message      =   "Se ha editado correctamente la marca";
+                $this->message      =   "Se ha editado correctamente el registro";
                 $this->records      =   $record;
             } else {
                 throw new \Exception("Ocurrió un problema al editar el registro");
@@ -148,6 +155,6 @@ class BrandController extends Controller
      */
     public function destroy($id)
     {
-        return Brand::find($id)->delete();
+        return Product::find($id)->delete();
     }
 }

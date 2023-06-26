@@ -2,18 +2,41 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Presentation;
+use Exception;
 use Illuminate\Http\Request;
 
 class PresentationController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
+    private $statusCode = 200;
+    private $result = false;
+    private $message = '';
+    private $records = [];
+
     public function index()
     {
-        //
+        try {
+            $presentation = Presentation::all();
+            if ($presentation) {
+                $this->statusCode   = 200;
+                $this->result       = true;
+                $this->message      = "Registro consultados exitosamente";
+                $this->records      = $presentation;
+            } else
+                throw new \Exception("No se encontraron registros");
+        } catch (\Exception $e) {
+            $this->statusCode = 204;
+            $this->result = false;
+            $this->message = env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al consultar los datos";
+        } finally {
+            $response = [
+                'result'    => $this->result,
+                'message'   => $this->message,
+                'records'   => $this->records,
+            ];
+            return response()->json($response, $this->statusCode);
+        }
     }
 
     /**
@@ -34,7 +57,31 @@ class PresentationController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try {
+            $newPresentation = Presentation::create([
+                'presentation' => $request->input('presentation')
+            ]);
+
+            if (!$newPresentation) {
+                throw new \Exception("Ocurrió un problema guardar la presentación. Por favor inténtelo nuevamente");
+            } else {
+                $this->statusCode   =   201;
+                $this->result       =   true;
+                $this->message      =   "Se ha registrado correctamente la presentación";
+                $this->records      =   $newPresentation;
+            }
+        } catch (\Exception $e) {
+            $this->statusCode   =   204;
+            $this->result       =   false;
+            $this->message      =   env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al guardar la presentación. Por favor inténtelo nuevamente";
+        } finally {
+            $response = [
+                'result'    => $this->result,
+                'message'   => $this->message,
+                'records'   => $this->records,
+            ];
+            return response()->json($response, $this->statusCode);
+        }
     }
 
     /**
@@ -45,7 +92,7 @@ class PresentationController extends Controller
      */
     public function show($id)
     {
-        //
+        return response()->json(Presentation::find($id), $this->statusCode);
     }
 
     /**
@@ -68,7 +115,29 @@ class PresentationController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        try {
+            $record = Presentation::find($id);
+            $record->name = $request->input('presentation', $record->presentation);
+            if ($record->save()) {
+                $this->statusCode   =   201;
+                $this->result       =   true;
+                $this->message      =   "Se ha editado correctamente el registro";
+                $this->records      =   $record;
+            } else {
+                throw new \Exception("Ocurrió un problema al editar el registro");
+            }
+        } catch (Exception $e) {
+            $this->statusCode   = 200;
+            $this->result       = false;
+            $this->message      = env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al editar el registro";
+        } finally {
+            $response = [
+                'result'    => $this->result,
+                'message'   => $this->message,
+                'records'   => $this->records,
+            ];
+            return response()->json($response, $this->statusCode);
+        }
     }
 
     /**
@@ -79,6 +148,6 @@ class PresentationController extends Controller
      */
     public function destroy($id)
     {
-        //
+        return Presentation::find($id)->delete();
     }
 }

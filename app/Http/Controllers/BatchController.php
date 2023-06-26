@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Brand;
+use App\Models\Batch;
 use Exception;
 use Illuminate\Http\Request;
 
-class BrandController extends Controller
+class BatchController extends Controller
 {
 
     private $statusCode = 200;
@@ -17,12 +17,12 @@ class BrandController extends Controller
     public function index()
     {
         try {
-            $brands = Brand::all();
-            if ($brands) {
+            $batch = Batch::all();
+            if ($batch) {
                 $this->statusCode   = 200;
                 $this->result       = true;
                 $this->message      = "Registro consultados exitosamente";
-                $this->records      = $brands;
+                $this->records      = $batch;
             } else
                 throw new \Exception("No se encontraron registros");
         } catch (\Exception $e) {
@@ -58,22 +58,27 @@ class BrandController extends Controller
     public function store(Request $request)
     {
         try {
-            $newBrand = Brand::create([
-                'name' => $request->input('name')
+            $newBatch = Batch::create([
+                'product_id' => $request->input('productId'),
+                'manufacturing_date' => $request->input('manufacturingDate'),
+                'expiration_date' => $request->input('expirationDate'),
+                'stock' => $request->input('stock'),
+                'price' => $request->input('price'),
+                'cost' => $request->input('cost')
             ]);
 
-            if (!$newBrand) {
-                throw new \Exception("Ocurrió un problema guardar la marca. Por favor inténtelo nuevamente");
+            if (!$newBatch) {
+                throw new \Exception("Ocurrió un problema guardar el registro. Por favor inténtelo nuevamente");
             } else {
                 $this->statusCode   =   201;
                 $this->result       =   true;
-                $this->message      =   "Se ha registrado correctamente la marca";
-                $this->records      =   $newBrand;
+                $this->message      =   "Se ha guardado correctamente el registro";
+                $this->records      =   $newBatch;
             }
         } catch (\Exception $e) {
             $this->statusCode   =   204;
             $this->result       =   false;
-            $this->message      =   env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al guardar la marca. Por favor inténtelo nuevamente";
+            $this->message      =   env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al guardar el registro. Por favor inténtelo nuevamente";
         } finally {
             $response = [
                 'result'    => $this->result,
@@ -92,7 +97,7 @@ class BrandController extends Controller
      */
     public function show($id)
     {
-        return response()->json(Brand::find($id), $this->statusCode);
+        return response()->json(Batch::find($id), $this->statusCode);
     }
 
     /**
@@ -116,12 +121,18 @@ class BrandController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $record = Brand::find($id);
-            $record->name = $request->input('name', $record->name);
+            $record = Batch::find($id);
+            $record->product_id = $request->input('productId', $record->product_id);
+            $record->manufacturing_date = $request->input('manufacturingDate', $record->manufacturing_date);
+            $record->expiration_date = $request->input('expirationDate', $record->expiration_date);
+            $record->stock = $request->input('stock', $record->stock);
+            $record->price = $request->input('price', $record->price);
+            $record->cost = $request->input('cost', $record->cost);
+
             if ($record->save()) {
                 $this->statusCode   =   201;
                 $this->result       =   true;
-                $this->message      =   "Se ha editado correctamente la marca";
+                $this->message      =   "Se ha editado correctamente el registro";
                 $this->records      =   $record;
             } else {
                 throw new \Exception("Ocurrió un problema al editar el registro");
@@ -148,6 +159,6 @@ class BrandController extends Controller
      */
     public function destroy($id)
     {
-        return Brand::find($id)->delete();
+        return Batch::find($id)->delete();
     }
 }

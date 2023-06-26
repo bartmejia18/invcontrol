@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Brand;
+use App\Models\Sale;
 use Exception;
 use Illuminate\Http\Request;
 
-class BrandController extends Controller
+class SalesController extends Controller
 {
 
     private $statusCode = 200;
@@ -17,12 +17,12 @@ class BrandController extends Controller
     public function index()
     {
         try {
-            $brands = Brand::all();
-            if ($brands) {
+            $sales = Sale::all();
+            if ($sales) {
                 $this->statusCode   = 200;
                 $this->result       = true;
                 $this->message      = "Registro consultados exitosamente";
-                $this->records      = $brands;
+                $this->records      = $sales;
             } else
                 throw new \Exception("No se encontraron registros");
         } catch (\Exception $e) {
@@ -58,22 +58,23 @@ class BrandController extends Controller
     public function store(Request $request)
     {
         try {
-            $newBrand = Brand::create([
-                'name' => $request->input('name')
+            $newSale = Sale::create([
+                'date' => $request->input('date'),
+                'total' => $request->input('total')
             ]);
 
-            if (!$newBrand) {
-                throw new \Exception("Ocurrió un problema guardar la marca. Por favor inténtelo nuevamente");
+            if (!$newSale) {
+                throw new \Exception("Ocurrió un problema guardar el registro. Por favor inténtelo nuevamente");
             } else {
                 $this->statusCode   =   201;
                 $this->result       =   true;
-                $this->message      =   "Se ha registrado correctamente la marca";
-                $this->records      =   $newBrand;
+                $this->message      =   "Se ha guardado correctamente el registro";
+                $this->records      =   $newSale;
             }
         } catch (\Exception $e) {
             $this->statusCode   =   204;
             $this->result       =   false;
-            $this->message      =   env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al guardar la marca. Por favor inténtelo nuevamente";
+            $this->message      =   env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al guardar el registro. Por favor inténtelo nuevamente";
         } finally {
             $response = [
                 'result'    => $this->result,
@@ -92,7 +93,7 @@ class BrandController extends Controller
      */
     public function show($id)
     {
-        return response()->json(Brand::find($id), $this->statusCode);
+        return response()->json(Sale::find($id), $this->statusCode);
     }
 
     /**
@@ -116,12 +117,14 @@ class BrandController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $record = Brand::find($id);
-            $record->name = $request->input('name', $record->name);
+            $record = Sale::find($id);
+            $record->date = $request->input('date', $record->date);
+            $record->total = $request->input('total', $record->total);
+
             if ($record->save()) {
                 $this->statusCode   =   201;
                 $this->result       =   true;
-                $this->message      =   "Se ha editado correctamente la marca";
+                $this->message      =   "Se ha editado correctamente el registro";
                 $this->records      =   $record;
             } else {
                 throw new \Exception("Ocurrió un problema al editar el registro");
@@ -148,6 +151,6 @@ class BrandController extends Controller
      */
     public function destroy($id)
     {
-        return Brand::find($id)->delete();
+        return Sale::find($id)->delete();
     }
 }
