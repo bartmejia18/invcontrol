@@ -71,7 +71,7 @@ class PresentationController extends Controller
                 $this->records      =   $newPresentation;
             }
         } catch (\Exception $e) {
-            $this->statusCode   =   204;
+            $this->statusCode   =   200;
             $this->result       =   false;
             $this->message      =   env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al guardar la presentación. Por favor inténtelo nuevamente";
         } finally {
@@ -117,7 +117,7 @@ class PresentationController extends Controller
     {
         try {
             $record = Presentation::find($id);
-            $record->name = $request->input('presentation', $record->presentation);
+            $record->presentation = $request->input('presentation', $record->presentation);
             if ($record->save()) {
                 $this->statusCode   =   201;
                 $this->result       =   true;

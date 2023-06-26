@@ -71,7 +71,7 @@ class BrandController extends Controller
                 $this->records      =   $newBrand;
             }
         } catch (\Exception $e) {
-            $this->statusCode   =   204;
+            $this->statusCode   =   200;
             $this->result       =   false;
             $this->message      =   env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al guardar la marca. Por favor inténtelo nuevamente";
         } finally {
@@ -117,6 +117,8 @@ class BrandController extends Controller
     {
         try {
             $record = Brand::find($id);
+
+            var_dump($request->input('name'));
             $record->name = $request->input('name', $record->name);
             if ($record->save()) {
                 $this->statusCode   =   201;

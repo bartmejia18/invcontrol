@@ -76,7 +76,7 @@ class BatchController extends Controller
                 $this->records      =   $newBatch;
             }
         } catch (\Exception $e) {
-            $this->statusCode   =   204;
+            $this->statusCode   =   200;
             $this->result       =   false;
             $this->message      =   env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al guardar el registro. Por favor inténtelo nuevamente";
         } finally {
@@ -130,7 +130,7 @@ class BatchController extends Controller
             $record->cost = $request->input('cost', $record->cost);
 
             if ($record->save()) {
-                $this->statusCode   =   201;
+                $this->statusCode   =   200;
                 $this->result       =   true;
                 $this->message      =   "Se ha editado correctamente el registro";
                 $this->records      =   $record;
