@@ -26,7 +26,7 @@ class SalesController extends Controller
             } else
                 throw new \Exception("No se encontraron registros");
         } catch (\Exception $e) {
-            $this->statusCode = 204;
+            $this->statusCode = 200;
             $this->result = false;
             $this->message = env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al consultar los datos";
         } finally {
@@ -72,7 +72,7 @@ class SalesController extends Controller
                 $this->records      =   $newSale;
             }
         } catch (\Exception $e) {
-            $this->statusCode   =   204;
+            $this->statusCode   =   200;
             $this->result       =   false;
             $this->message      =   env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al guardar el registro. Por favor inténtelo nuevamente";
         } finally {

@@ -26,7 +26,7 @@ class UnitMeasurementController extends Controller
             } else
                 throw new \Exception("No se encontraron registros");
         } catch (\Exception $e) {
-            $this->statusCode = 204;
+            $this->statusCode = 200;
             $this->result = false;
             $this->message = env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al consultar los datos";
         } finally {
@@ -59,7 +59,7 @@ class UnitMeasurementController extends Controller
     {
         try {
             $newUnit = UnitMeasurement::create([
-                'presentation' => $request->input('presentation')
+                'unit_measurement' => $request->input('unitMeasurement')
             ]);
 
             if (!$newUnit) {
@@ -71,7 +71,7 @@ class UnitMeasurementController extends Controller
                 $this->records      =   $newUnit;
             }
         } catch (\Exception $e) {
-            $this->statusCode   =   204;
+            $this->statusCode   =   200;
             $this->result       =   false;
             $this->message      =   env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al guardar el registro. Por favor inténtelo nuevamente";
         } finally {
@@ -117,7 +117,7 @@ class UnitMeasurementController extends Controller
     {
         try {
             $record = UnitMeasurement::find($id);
-            $record->name = $request->input('presentation', $record->presentation);
+            $record->unit_measurement = $request->input('unitMeasurement', $record->unit_measurement);
             if ($record->save()) {
                 $this->statusCode   =   201;
                 $this->result       =   true;
