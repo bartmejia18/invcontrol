@@ -30,6 +30,8 @@ class AuthController extends Controller
                 'password' => Hash::make($request->password)
             ]);
 
+            $user->assignRole($request->input('roles'));
+
             $user->token  = JWTAuth::fromUser($user);
 
             return new UserResource($user);
