@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Batch extends Model
 {
@@ -18,4 +19,8 @@ class Batch extends Model
         'price',
         'cost'
     ];
+
+    public function product(): HasOne{  
+        return $this->hasOne(Product::class, 'id', 'product_id');
+    }
 }

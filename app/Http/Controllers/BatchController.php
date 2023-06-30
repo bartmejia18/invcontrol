@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Batch;
+use App\Models\Brand;
 use Exception;
 use Illuminate\Http\Request;
 
@@ -17,8 +18,13 @@ class BatchController extends Controller
     public function index()
     {
         try {
-            $batch = Batch::all();
+            $batch = Batch::with('product:id,name,brand_id')->get();
             if ($batch) {
+                $batch->map(function($item, $key) {
+                    $brand = Brand::where('id', $item->product->brand_id)->select('name')->first();
+                    $item->product->brand = $brand->name;
+                }); 
+            
                 $this->statusCode   = 200;
                 $this->result       = true;
                 $this->message      = "Registro consultados exitosamente";
