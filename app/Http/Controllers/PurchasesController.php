@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PurchaseDetails;
 use App\Models\Purchases;
 use Exception;
 use Illuminate\Http\Request;
@@ -63,9 +64,23 @@ class PurchasesController extends Controller
                 'total' => $request->input('total')
             ]);
 
+
             if (!$newPurchase) {
                 throw new \Exception("Ocurrió un problema guardar el registro. Por favor inténtelo nuevamente");
             } else {
+
+                $detail = json_decode($request->input('details'),true);
+                foreach ($detail as $item) {
+                    
+                    var_dump(intval($item['batch_id']));
+                    var_dump($newPurchase->id);
+
+                    PurchaseDetails::create([
+                        'purchase_id' => $newPurchase->id,
+                        'batch_id' => intval($item['batch_id'])
+                    ]);  
+                }
+
                 $this->statusCode   =   201;
                 $this->result       =   true;
                 $this->message      =   "Se ha guardado correctamente el registro";

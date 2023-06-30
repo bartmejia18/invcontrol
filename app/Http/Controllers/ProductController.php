@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Batch;
 use App\Models\Product;
 use Exception;
 use Illuminate\Http\Request;
@@ -17,8 +18,25 @@ class ProductController extends Controller
     public function index()
     {
         try {
-            $products = Product::all();
+            $products = Product::with(
+                'brand:id,name',
+                'presentation:id,presentation',
+                'unitMeasurement:id,unit_measurement'
+                )->get();
+
             if ($products) {
+                
+                $products->map(function($product, $key) {
+                    $product->stock = Batch::select(
+                        'id', 
+                        'stock',
+                        'price',
+                        'cost',
+                        'manufacturing_date',
+                        'expiration_date')->where('product_id', $product->id)->get();
+                    $product->totalStock = $product->stock->sum('stock');
+                });
+
                 $this->statusCode   = 200;
                 $this->result       = true;
                 $this->message      = "Registro consultados exitosamente";
@@ -156,5 +174,49 @@ class ProductController extends Controller
     public function destroy($id)
     {
         return Product::find($id)->delete();
+    }
+
+    public function search(Request $request) {
+        try {
+
+            $search = $request->input('search');
+            $products = Product::with(
+                'brand:id,name',
+                'presentation:id,presentation',
+                'unitMeasurement:id,unit_measurement'
+                )->where('name', 'LIKE', "%{$search}%")->get();
+
+            if ($products) {
+
+                $products->map(function($product, $key) {
+                    $product->stock = Batch::select(
+                        'id', 
+                        'stock',
+                        'price',
+                        'cost',
+                        'manufacturing_date',
+                        'expiration_date')->where('product_id', $product->id)->get();
+                    $product->totalStock = $product->stock->sum('stock');
+                });
+
+                $this->statusCode   = 200;
+                $this->result       = true;
+                $this->message      = "Registro consultados exitosamente";
+                $this->records      = $products;
+            } else
+                throw new \Exception("No se encontraron registros");
+        } catch (\Exception $e) {
+            $this->statusCode = 200;
+            $this->result = false;
+            $this->message = env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al consultar los datos";
+        } finally {
+            $response = [
+                'result'    => $this->result,
+                'message'   => $this->message,
+                'records'   => $this->records,
+            ];
+            return response()->json($response, $this->statusCode);
+        }
+
     }
 }

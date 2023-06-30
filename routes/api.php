@@ -33,3 +33,5 @@ Route::resource('product',  ProductController::class);
 Route::resource('purchases',  PurchasesController::class);
 Route::resource('sales',  SalesController::class);
 Route::resource('unitMeasurement',  UnitMeasurementController::class);
+
+Route::get('searchProduct',  [ProductController::class, 'search']);
