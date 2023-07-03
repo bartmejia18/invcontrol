@@ -11,6 +11,7 @@ class Sale extends Model
 
     protected $table = 'sale';
     protected $fillable = [
+        'customer',
         'date',
         'total'
     ];
