@@ -13,12 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('batch', function (Blueprint $table) {
+        Schema::create('supplier', function (Blueprint $table) {
             $table->id();
-            $table->integer('product_id');
-            $table->date('manufacturing_date');
-            $table->date('expiration_date');
-            $table->integer('stock');
+            $table->string('name');
             $table->timestamps();
         });
     }
@@ -30,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('batch');
+        Schema::dropIfExists('supplier');
     }
 };

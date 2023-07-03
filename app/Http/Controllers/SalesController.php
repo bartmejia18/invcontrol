@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Batch;
 use App\Models\Sale;
+use App\Models\SaleDetail;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SalesController extends Controller
 {
@@ -14,8 +17,7 @@ class SalesController extends Controller
     private $message = '';
     private $records = [];
 
-    public function index()
-    {
+    public function index() {
         try {
             $sales = Sale::all();
             if ($sales) {
@@ -58,20 +60,58 @@ class SalesController extends Controller
     public function store(Request $request)
     {
         try {
+            DB::beginTransaction();
             $newSale = Sale::create([
+                'customer' => $request->input('customer'),
                 'date' => $request->input('date'),
-                'total' => $request->input('total')
+                'total' => $request->input('total'),
+
             ]);
 
             if (!$newSale) {
                 throw new \Exception("Ocurrió un problema guardar el registro. Por favor inténtelo nuevamente");
             } else {
+
+                $details = json_decode($request->input('details'),true);
+                foreach ($details as $detail) {
+                    $batchs = Batch::where('product_id', $detail['productId'])->get();
+                    $batchs = $batchs->filter(function($batch) {
+                        return $batch->stock > 0;
+                    });
+
+                    if ($batchs->sum('stock') >= $detail['quantity']) {
+
+                        $tempStock = $detail['quantity'];
+        
+                        foreach ($batchs as $batch) {
+                            if ($batch->stock >= $tempStock && $tempStock != 0) {
+                                $batch->stock = $batch->stock - $tempStock;
+                                $tempStock = 0;
+                                $batch->save();
+                            } else if ($batch->stock < $tempStock && $tempStock != 0){
+                                $tempStock = $tempStock - $batch->stock;
+                                $batch->stock = 0;
+                                $batch->save();
+                            }
+                        }
+
+                        SaleDetail::create([
+                            "product_id" => $detail['productId'],
+                            "quantity" => $detail['quantity'],
+                            "subtotal" => $detail['subtotal']    
+                        ]);
+                    } else {
+                        throw new \Exception("La cantidad de productos ingresados es mayor al stock");
+                    }
+                }
+                DB::commit();
                 $this->statusCode   =   201;
                 $this->result       =   true;
                 $this->message      =   "Se ha guardado correctamente el registro";
                 $this->records      =   $newSale;
             }
         } catch (\Exception $e) {
+            DB::rollBack();
             $this->statusCode   =   200;
             $this->result       =   false;
             $this->message      =   env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al guardar el registro. Por favor inténtelo nuevamente";
@@ -122,6 +162,9 @@ class SalesController extends Controller
             $record->total = $request->input('total', $record->total);
 
             if ($record->save()) {
+
+                
+
                 $this->statusCode   =   201;
                 $this->result       =   true;
                 $this->message      =   "Se ha editado correctamente el registro";

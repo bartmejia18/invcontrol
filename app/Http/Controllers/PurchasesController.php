@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Batch;
 use App\Models\PurchaseDetails;
 use App\Models\Purchases;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PurchasesController extends Controller
 {
@@ -59,7 +61,9 @@ class PurchasesController extends Controller
     public function store(Request $request)
     {
         try {
+            DB::beginTransaction();
             $newPurchase = Purchases::create([
+                'supplier_id' =>$request->input('supplierId'),
                 'date' => $request->input('date'),
                 'total' => $request->input('total')
             ]);
@@ -72,21 +76,31 @@ class PurchasesController extends Controller
                 $detail = json_decode($request->input('details'),true);
                 foreach ($detail as $item) {
                     
-                    var_dump(intval($item['batch_id']));
-                    var_dump($newPurchase->id);
+                    $newBatch = Batch::create([
+                        'product_id' => $item['productId'],
+                        'manufacturing_date' => $item['manufacturingDate'],
+                        'expiration_date' => $item['expirationDate'],
+                        'stock' => $item['stock']   
+                    ]);
 
-                    PurchaseDetails::create([
-                        'purchase_id' => $newPurchase->id,
-                        'batch_id' => intval($item['batch_id'])
-                    ]);  
+                    if ($newBatch) {
+                        PurchaseDetails::create([
+                            'purchase_id' => $newPurchase->id,
+                            'batch_id' => $newBatch->id
+                        ]);  
+
+                        DB::commit();
+                        $this->statusCode   =   201;
+                        $this->result       =   true;
+                        $this->message      =   "Se ha guardado correctamente el registro";
+                        $this->records      =   $newPurchase;
+                    } else {
+                        throw new \Exception("Ocurrió un problema guardar el registro. Por favor inténtelo nuevamente");
+                    }   
                 }
-
-                $this->statusCode   =   201;
-                $this->result       =   true;
-                $this->message      =   "Se ha guardado correctamente el registro";
-                $this->records      =   $newPurchase;
             }
         } catch (\Exception $e) {
+            DB::rollBack();
             $this->statusCode   =   200;
             $this->result       =   false;
             $this->message      =   env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al guardar el registro. Por favor inténtelo nuevamente";

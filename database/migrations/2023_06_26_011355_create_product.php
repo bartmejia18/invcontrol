@@ -17,8 +17,11 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->integer('brand_id');
+            $table->double('cost');
+            $table->double('price');
             $table->integer('presentation_id');
             $table->integer('unit_measurement_id');
+            $table->string('image');
             $table->timestamps();
         });
     }

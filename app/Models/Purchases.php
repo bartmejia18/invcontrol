@@ -11,6 +11,7 @@ class Purchases extends Model
 
     protected $table = 'purchases';
     protected $fillable = [
+        'supplier_id',
         'date',
         'total'
     ];
