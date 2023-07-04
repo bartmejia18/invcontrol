@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Batch;
+use App\Models\Product;
 use App\Models\PurchaseDetails;
 use App\Models\Purchases;
 use Exception;
@@ -181,5 +182,68 @@ class PurchasesController extends Controller
     public function destroy($id)
     {
         return Purchases::find($id)->delete();
+    }
+
+    public function getPurchases(Request $request) {
+        $purchases = new Purchases();
+
+        switch ($request->input('type')) {
+            case 1:
+                $purchases = Purchases::where('date', $request->input('startDate'))->get();
+                $purchases->map(function($purchase, $key) { 
+                    $purchase->details = $this->getDetailsPurchases($purchase->id);
+                });
+                break;
+            case 2:
+                $purchases = Purchases::whereBetween('date', [$request->input('startDate'), $request->input('endDate')])->get();
+                $purchases->map(function($purchase, $key) { 
+                    $purchase->details = $this->getDetailsPurchases($purchase->id);
+                });
+                break;
+            case 3:
+                $purchases = Purchases::whereRaw('MONTH(date) = ?',$request->input('month'))->get();
+                $purchases->map(function($purchase, $key) { 
+                    $purchase->details = $this->getDetailsPurchases($purchase->id);
+                });
+                break;
+            case 4:
+                $purchases = Purchases::whereBetween('date', [$request->input('startDate'), $request->input('endDate')])->get();
+                $purchases->map(function($purchase, $key) { 
+                    $purchase->details = $this->getDetailsPurchases($purchase);
+                });
+                break;
+        }
+
+        if (count($purchases) == 0 ) {
+            $this->statusCode   = 200;
+            $this->result       = false;
+            $this->message      = "No sé encontraron registros";
+        } else {
+            $this->statusCode   = 200;
+            $this->result       = true;
+            $this->records      = $purchases;
+        }
+
+        return response()->json([
+            'result'    => $this->result,
+            'message'   => $this->message,
+            'records'   => $this->records,
+        ], $this->statusCode);
+    }
+
+    public function getDetailsPurchases($purchaseId) {
+        $purchaseDetail = "";
+        $purchaseDetail = PurchaseDetails::where('purchase_id', $purchaseId)->get();
+        $purchaseDetail->map(function($detail, $key) {
+            $batch = Batch::find($detail->id);
+            $batch->product = Product::with(
+                'brand:id,name',
+                'presentation:id,presentation',
+                'unitMeasurement:id,unit_measurement'
+                )->where('id',$batch->product_id)->first();
+            $detail->batch = $batch;
+        });
+
+        return $purchaseDetail;
     }
 }
