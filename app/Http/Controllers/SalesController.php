@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Batch;
+use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleDetail;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class SalesController extends Controller
-{
+class SalesController extends Controller {
 
     private $statusCode = 200;
     private $result = false;
@@ -96,6 +96,7 @@ class SalesController extends Controller
                         }
 
                         SaleDetail::create([
+                            "sale_id" => $newSale->id,
                             "product_id" => $detail['productId'],
                             "quantity" => $detail['quantity'],
                             "subtotal" => $detail['subtotal']    
@@ -195,5 +196,67 @@ class SalesController extends Controller
     public function destroy($id)
     {
         return Sale::find($id)->delete();
+    }
+
+    public function getSales(Request $request) {
+
+        $sales = new Sale();
+
+        switch ($request->input('type')) {
+            case 1:
+                $sales = Sale::where('date', $request->input('startDate'))->get();
+                $sales->map(function($sale, $key) { 
+                    $sale->details = $this->getDetailsSales($sale->id);
+                });
+                break;
+            case 2:
+                $sales = Sale::whereBetween('date', [$request->input('startDate'), $request->input('endDate')])->get();
+                $sales->map(function($sale, $key) { 
+                    $sale->details = $this->getDetailsSales($sale->id);
+                });
+                break;
+            case 3:
+                $sales = Sale::whereRaw('MONTH(date) = ?',$request->input('month'))->get();
+                $sales->map(function($sale, $key) { 
+                    $sale->details = $this->getDetailsSales($sale->id);
+                });
+                break;
+            case 4:
+                $sales = Sale::whereBetween('date', [$request->input('startDate'), $request->input('endDate')])->get();
+                $sales->map(function($sale, $key) { 
+                    $sale->details = $this->getDetailsSales($sale->id);
+                });
+                break;
+        }
+
+        if (count($sales) == 0 ) {
+            $this->statusCode   = 200;
+            $this->result       = false;
+            $this->message      = "No sé encontraron registros";
+        } else {
+            $this->statusCode   = 200;
+            $this->result       = true;
+            $this->records      = $sales;
+        }
+
+        return response()->json([
+            'result'    => $this->result,
+            'message'   => $this->message,
+            'records'   => $this->records,
+        ], $this->statusCode);
+    }
+
+    public function getDetailsSales($saleId) {
+        $saleDetail = "";
+        $saleDetail = SaleDetail::where('sale_id', $saleId)->get();
+        $saleDetail->map(function($detail, $key) {
+            $detail->product = Product::with(
+                'brand:id,name',
+                'presentation:id,presentation',
+                'unitMeasurement:id,unit_measurement'
+                )->where('id',$detail->product_id)->first();
+        });
+
+        return $saleDetail;
     }
 }

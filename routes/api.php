@@ -35,3 +35,5 @@ Route::resource('sales',  SalesController::class);
 Route::resource('unitMeasurement',  UnitMeasurementController::class);
 
 Route::get('searchProduct',  [ProductController::class, 'search']);
+Route::get('getSales',  [SalesController::class, 'getSales']);
+Route::get('getPurchases',  [PurchasesController::class, 'getPurchases']);
