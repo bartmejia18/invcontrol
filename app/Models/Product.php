@@ -19,7 +19,8 @@ class Product extends Model
         'price',
         'presentation_id',
         'unit_measurement_id',
-        'image'
+        'image',
+        'status'
     ];
 
     public function brand(): HasOne {

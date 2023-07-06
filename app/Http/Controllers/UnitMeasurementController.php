@@ -59,7 +59,8 @@ class UnitMeasurementController extends Controller
     {
         try {
             $newUnit = UnitMeasurement::create([
-                'unit_measurement' => $request->input('unitMeasurement')
+                'unit_measurement' => $request->input('unitMeasurement'),
+                'status' => 1
             ]);
 
             if (!$newUnit) {
@@ -118,6 +119,8 @@ class UnitMeasurementController extends Controller
         try {
             $record = UnitMeasurement::find($id);
             $record->unit_measurement = $request->input('unitMeasurement', $record->unit_measurement);
+            $record->status = $request->input('status', $record->status);
+            
             if ($record->save()) {
                 $this->statusCode   =   201;
                 $this->result       =   true;

@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Batch;
+use App\Models\Brand;
+use App\Models\Presentation;
 use App\Models\Product;
+use App\Models\UnitMeasurement;
 use Exception;
 use Illuminate\Http\Request;
 
@@ -83,12 +86,17 @@ class ProductController extends Controller
                 'cost' => $request->input('cost'),
                 'presentation_id' => $request->input('presentationId'),
                 'unit_measurement_id' => $request->input('unitMeasurementId'),
-                'image' => $request->input('image')
+                'image' => $request->input('image'),
+                'status' => 1
             ]);
 
             if (!$newProduct) {
                 throw new \Exception("Ocurrió un problema guardar el registro. Por favor inténtelo nuevamente");
             } else {
+                $newProduct->brand = Brand::where('id', $newProduct->brand_id)->pluck('name');
+                $newProduct->presentation = Presentation::where('id', $newProduct->presentation_id)->pluck('presentation');
+                $newProduct->unit_measurement = UnitMeasurement::where('id', $newProduct->unit_measurement_id)->pluck('unit_measurement');
+
                 $this->statusCode   =   201;
                 $this->result       =   true;
                 $this->message      =   "Se ha guardado correctamente el registro";
@@ -145,6 +153,7 @@ class ProductController extends Controller
             $record->brand_id = $request->input('brandId', $record->brand_id);
             $record->presentation_id = $request->input('presentationId', $record->presentation_id);
             $record->unit_measurement_id = $request->input('unitMeasurementId', $record->unit_measurement_id);
+            $record->status = $request->input('status', $record->status);
 
             if ($record->save()) {
                 $this->statusCode   =   201;
@@ -176,6 +185,7 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
+
         return Product::find($id)->delete();
     }
 

@@ -11,6 +11,7 @@ class UnitMeasurement extends Model
 
     protected $table = 'unit_measurement';
     protected $fillable = [
-        'unit_measurement'
+        'unit_measurement',
+        'status'
     ];
 }
