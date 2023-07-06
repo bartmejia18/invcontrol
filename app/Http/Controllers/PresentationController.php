@@ -59,7 +59,8 @@ class PresentationController extends Controller
     {
         try {
             $newPresentation = Presentation::create([
-                'presentation' => $request->input('presentation')
+                'presentation' => $request->input('presentation'),
+                'status' => 1
             ]);
 
             if (!$newPresentation) {
@@ -118,6 +119,8 @@ class PresentationController extends Controller
         try {
             $record = Presentation::find($id);
             $record->presentation = $request->input('presentation', $record->presentation);
+            $record->status = $request->input('status', $record->status);
+            
             if ($record->save()) {
                 $this->statusCode   =   201;
                 $this->result       =   true;
