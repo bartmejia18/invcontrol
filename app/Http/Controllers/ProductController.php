@@ -102,7 +102,7 @@ class ProductController extends Controller
                     'unitMeasurement:id,unit_measurement'
                     )
                     ->where('id', $newProduct->id)
-                    ->get();
+                    ->first();
 
                 DB::commit();
                 $this->statusCode   =   201;
@@ -176,7 +176,7 @@ class ProductController extends Controller
                     'unitMeasurement:id,unit_measurement'
                     )
                     ->where('id', $record->id)
-                    ->get();
+                    ->first();
 
                 DB::commit();
                 $this->statusCode   =   201;
