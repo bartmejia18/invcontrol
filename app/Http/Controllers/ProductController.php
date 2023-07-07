@@ -104,6 +104,8 @@ class ProductController extends Controller
                     ->where('id', $newProduct->id)
                     ->first();
 
+                $product->totalStock = 0;
+
                 DB::commit();
                 $this->statusCode   =   201;
                 $this->result       =   true;
