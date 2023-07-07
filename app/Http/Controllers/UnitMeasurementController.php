@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\UnitMeasurement;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class UnitMeasurementController extends Controller
 {
@@ -17,7 +18,7 @@ class UnitMeasurementController extends Controller
     public function index()
     {
         try {
-            $unit = UnitMeasurement::all();
+            $unit = UnitMeasurement::where('status', 1)->get();
             if ($unit) {
                 $this->statusCode   = 200;
                 $this->result       = true;
@@ -151,6 +152,34 @@ class UnitMeasurementController extends Controller
      */
     public function destroy($id)
     {
-        return UnitMeasurement::find($id)->delete();
+        try {
+            DB::beginTransaction();
+            $unitMeasurement = UnitMeasurement::find($id);
+
+            if ($unitMeasurement) {
+                $unitMeasurement->status = 0;
+                
+                if ($unitMeasurement->save()) {
+                    DB::commit();
+                    $this->statusCode   =   201;
+                    $this->result       =   true;
+                    $this->message      =   "Se ha eliminado el registro correctamente";
+                }
+            } else {
+                throw new \Exception("No se encontró el registro");
+            }
+        } catch (Exception $e) {
+            DB::rollBack();
+            $this->statusCode   = 200;
+            $this->result       = false;
+            $this->message      = env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al eliminar el registro";
+        } finally {
+            $response = [
+                'result'    => $this->result,
+                'message'   => $this->message,
+                'records'   => $this->records,
+            ];
+            return response()->json($response, $this->statusCode);
+        }
     }
 }
