@@ -10,6 +10,7 @@ use App\Models\UnitMeasurement;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -80,6 +81,14 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         try {
+
+            $pathImage = "";
+
+            if ($request->hasFile('image')) {
+                $file = $request->file('image');
+                $pathImage = Storage::putFile('public/products', $file);
+            }
+
             DB::beginTransaction();
             $newProduct = Product::create([
                 'name' => $request->input('name'),
@@ -88,7 +97,7 @@ class ProductController extends Controller
                 'cost' => $request->input('cost'),
                 'presentation_id' => $request->input('presentationId'),
                 'unit_measurement_id' => $request->input('unitMeasurementId'),
-                'image' => $request->input('image'),
+                'image' => $pathImage,
                 'status' => 1
             ]);
 
@@ -159,6 +168,14 @@ class ProductController extends Controller
     public function update(Request $request, $id)
     {
         try {
+
+            $pathImage = "";
+
+            if ($request->hasFile('image')) {
+                $file = $request->file('image');
+                $pathImage = Storage::putFile('public/products', $file);
+            }
+
             DB::beginTransaction();
             $record = Product::find($id);
             $record->name = $request->input('name', $record->name);
@@ -168,7 +185,10 @@ class ProductController extends Controller
             $record->price = $request->input('price', $record->price);
             $record->cost = $request->input('cost', $record->cost);
             $record->status = $request->input('status', $record->status);
-            $record->image = $request->input('image', $record->image);
+
+            if ($pathImage != "" ) {
+                $record->image = $pathImage;
+            }
 
             if ($record->save()) {
 
