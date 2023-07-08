@@ -86,9 +86,12 @@ class ProductController extends Controller
 
             if ($request->hasFile('image')) {
                 $file = $request->file('image');
-                $pathImage = Storage::putFile('public/products', $file);
+                $destination = 'images/products/';
+                $fileName = time().'.'.$file->extension();
+                $file->move($destination, $fileName);
+                $pathImage = $destination . $fileName;
             }
-
+            
             DB::beginTransaction();
             $newProduct = Product::create([
                 'name' => $request->input('name'),
@@ -173,7 +176,10 @@ class ProductController extends Controller
 
             if ($request->hasFile('image')) {
                 $file = $request->file('image');
-                $pathImage = Storage::putFile('public/products', $file);
+                $destination = 'images/products/';
+                $fileName = time().'.'.$file->extension();
+                $file->move($destination, $fileName);
+                $pathImage = $destination . $fileName;
             }
 
             DB::beginTransaction();
