@@ -132,8 +132,6 @@ class BatchController extends Controller
             $record->manufacturing_date = $request->input('manufacturingDate', $record->manufacturing_date);
             $record->expiration_date = $request->input('expirationDate', $record->expiration_date);
             $record->stock = $request->input('stock', $record->stock);
-            $record->price = $request->input('price', $record->price);
-            $record->cost = $request->input('cost', $record->cost);
 
             if ($record->save()) {
                 $this->statusCode   =   200;
