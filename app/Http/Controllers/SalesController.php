@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Batch;
 use App\Models\Product;
 use App\Models\Sale;
-use App\Models\SaleDetail;
+use App\Models\SaleDetails;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -97,7 +97,7 @@ class SalesController extends Controller {
                             }
                         }
 
-                        SaleDetail::create([
+                        SaleDetails::create([
                             "sale_id" => $newSale->id,
                             "product_id" => $detail['productId'],
                             "quantity" => $detail['quantity'],
@@ -250,7 +250,7 @@ class SalesController extends Controller {
 
     public function getDetailsSales($saleId) {
         $saleDetail = "";
-        $saleDetail = SaleDetail::where('sale_id', $saleId)->get();
+        $saleDetail = SaleDetails::where('sale_id', $saleId)->get();
         $saleDetail->map(function($detail, $key) {
             $detail->product = Product::with(
                 'brand:id,name',
