@@ -36,9 +36,11 @@ class ProductController extends Controller
                         'id', 
                         'stock',
                         'manufacturing_date',
-                        'expiration_date')->where('product_id', $product->id)->get()->filter(function($item) {
-                            return $item->stock > 0;
-                        });
+                        'expiration_date')
+                        ->where('product_id', $product->id)
+                        ->where('stock','>',0)
+                        ->get();
+                        
                     $product->totalStock = $product->stock->sum('stock');
                 });
 

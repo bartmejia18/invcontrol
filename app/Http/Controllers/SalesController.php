@@ -84,14 +84,16 @@ class SalesController extends Controller {
                         $tempStock = $detail['quantity'];
         
                         foreach ($batchs as $batch) {
-                            if ($batch->stock >= $tempStock && $tempStock != 0) {
-                                $batch->stock = $batch->stock - $tempStock;
-                                $tempStock = 0;
-                                $batch->save();
-                            } else if ($batch->stock < $tempStock && $tempStock != 0){
-                                $tempStock = $tempStock - $batch->stock;
-                                $batch->stock = 0;
-                                $batch->save();
+                            if ($tempStock != 0) {
+                                if ($batch->stock >= $tempStock) {
+                                    $batch->stock = $batch->stock - $tempStock;
+                                    $tempStock = 0;
+                                    $batch->save();
+                                } else {
+                                    $tempStock = $tempStock - $batch->stock;
+                                    $batch->stock = 0;
+                                    $batch->save();
+                                }
                             }
                         }
 
