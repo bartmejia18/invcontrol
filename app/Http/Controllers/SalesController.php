@@ -74,10 +74,8 @@ class SalesController extends Controller {
 
                 $details = json_decode($request->input('details'),true);
                 foreach ($details as $detail) {
-                    $batchs = Batch::where('product_id', $detail['productId'])->get();
-                    $batchs = $batchs->filter(function($batch) {
-                        return $batch->stock > 0;
-                    });
+                    $batchs = Batch::where('product_id', $detail['productId'])
+                                    ->where('stock','>',0)->get();
 
                     if ($batchs->sum('stock') >= $detail['quantity']) {
 
@@ -88,10 +86,12 @@ class SalesController extends Controller {
                                 if ($batch->stock >= $tempStock) {
                                     $batch->stock = $batch->stock - $tempStock;
                                     $tempStock = 0;
+                                    var_dump("0-".$tempStock);
                                     $batch->save();
                                 } else {
                                     $tempStock = $tempStock - $batch->stock;
                                     $batch->stock = 0;
+                                    var_dump("1-".$tempStock);
                                     $batch->save();
                                 }
                             }
