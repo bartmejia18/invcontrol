@@ -86,12 +86,10 @@ class SalesController extends Controller {
                                 if ($batch->stock >= $tempStock) {
                                     $batch->stock = $batch->stock - $tempStock;
                                     $tempStock = 0;
-                                    var_dump("0-".$tempStock);
                                     $batch->save();
                                 } else {
                                     $tempStock = $tempStock - $batch->stock;
                                     $batch->stock = 0;
-                                    var_dump("1-".$tempStock);
                                     $batch->save();
                                 }
                             }
