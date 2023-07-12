@@ -201,7 +201,10 @@ class PurchasesController extends Controller
                 });
                 break;
             case 3:
-                $purchases = Purchases::whereRaw('MONTH(date) = ?',$request->input('month'))->get();
+                $timestamp = strtotime($request->input('startDate'));
+                $month = date('m', $timestamp);
+                $year = date('Y', $timestamp);
+                $purchases = Purchases::whereYear('date', $year)->whereMonth('date', $month)->get();
                 $purchases->map(function($purchase, $key) { 
                     $purchase->details = $this->getDetailsPurchases($purchase->id);
                 });
