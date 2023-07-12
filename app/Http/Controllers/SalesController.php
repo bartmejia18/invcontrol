@@ -202,6 +202,8 @@ class SalesController extends Controller {
 
         $sales = new Sale();
 
+        
+
         switch ($request->input('type')) {
             case 1:
                 $sales = Sale::where('date', $request->input('startDate'))->get();
@@ -216,7 +218,10 @@ class SalesController extends Controller {
                 });
                 break;
             case 3:
-                $sales = Sale::whereRaw('MONTH(date) = ?',$request->input('month'))->get();
+                $timestamp = strtotime($request->input('startDate'));
+                $month = date('m', $timestamp);
+                $year = date('Y', $timestamp);
+                $sales = Sale::whereYear('date', $year)->whereMonth('date', $month)->get();
                 $sales->map(function($sale, $key) { 
                     $sale->details = $this->getDetailsSales($sale->id);
                 });
