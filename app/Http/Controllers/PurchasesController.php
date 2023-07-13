@@ -64,7 +64,7 @@ class PurchasesController extends Controller
         try {
             DB::beginTransaction();
             $newPurchase = Purchases::create([
-                'supplier_id' =>$request->input('supplierId'),
+                'supplier_id' => $request->input('supplierId'),
                 'date' => $request->input('date'),
                 'total' => $request->input('total')
             ]);
@@ -74,21 +74,21 @@ class PurchasesController extends Controller
                 throw new \Exception("Ocurrió un problema guardar el registro. Por favor inténtelo nuevamente");
             } else {
 
-                $detail = json_decode($request->input('details'),true);
+                $detail = json_decode($request->input('details'), true);
                 foreach ($detail as $item) {
-                    
+
                     $newBatch = Batch::create([
                         'product_id' => $item['productId'],
                         'manufacturing_date' => $item['manufacturingDate'],
                         'expiration_date' => $item['expirationDate'],
-                        'stock' => $item['stock']   
+                        'stock' => $item['stock']
                     ]);
 
                     if ($newBatch) {
                         PurchaseDetails::create([
                             'purchase_id' => $newPurchase->id,
                             'batch_id' => $newBatch->id
-                        ]);  
+                        ]);
 
                         DB::commit();
                         $this->statusCode   =   201;
@@ -97,7 +97,7 @@ class PurchasesController extends Controller
                         $this->records      =   $newPurchase;
                     } else {
                         throw new \Exception("Ocurrió un problema guardar el registro. Por favor inténtelo nuevamente");
-                    }   
+                    }
                 }
             }
         } catch (\Exception $e) {
@@ -184,19 +184,20 @@ class PurchasesController extends Controller
         return Purchases::find($id)->delete();
     }
 
-    public function getPurchases(Request $request) {
+    public function getPurchases(Request $request)
+    {
         $purchases = new Purchases();
 
         switch ($request->input('type')) {
             case 1:
-                $purchases = Purchases::where('date', $request->input('startDate'))->get();
-                $purchases->map(function($purchase, $key) { 
+                $purchases = Purchases::with('supplier:id,name')->where('date', $request->input('startDate'))->get();
+                $purchases->map(function ($purchase, $key) {
                     $purchase->details = $this->getDetailsPurchases($purchase->id);
                 });
                 break;
             case 2:
-                $purchases = Purchases::whereBetween('date', [$request->input('startDate'), $request->input('endDate')])->get();
-                $purchases->map(function($purchase, $key) { 
+                $purchases = Purchases::with('supplier:id,name')->whereBetween('date', [$request->input('startDate'), $request->input('endDate')])->get();
+                $purchases->map(function ($purchase, $key) {
                     $purchase->details = $this->getDetailsPurchases($purchase->id);
                 });
                 break;
@@ -204,20 +205,20 @@ class PurchasesController extends Controller
                 $timestamp = strtotime($request->input('startDate'));
                 $month = date('m', $timestamp);
                 $year = date('Y', $timestamp);
-                $purchases = Purchases::whereYear('date', $year)->whereMonth('date', $month)->get();
-                $purchases->map(function($purchase, $key) { 
+                $purchases = Purchases::with('supplier:id,name')->whereYear('date', $year)->whereMonth('date', $month)->get();
+                $purchases->map(function ($purchase, $key) {
                     $purchase->details = $this->getDetailsPurchases($purchase->id);
                 });
                 break;
             case 4:
-                $purchases = Purchases::whereBetween('date', [$request->input('startDate'), $request->input('endDate')])->get();
-                $purchases->map(function($purchase, $key) { 
+                $purchases = Purchases::with('supplier:id,name')->whereBetween('date', [$request->input('startDate'), $request->input('endDate')])->get();
+                $purchases->map(function ($purchase, $key) {
                     $purchase->details = $this->getDetailsPurchases($purchase);
                 });
                 break;
         }
 
-        if (count($purchases) == 0 ) {
+        if (count($purchases) == 0) {
             $this->statusCode   = 200;
             $this->result       = false;
             $this->message      = "No sé encontraron registros";
@@ -234,16 +235,17 @@ class PurchasesController extends Controller
         ], $this->statusCode);
     }
 
-    public function getDetailsPurchases($purchaseId) {
+    public function getDetailsPurchases($purchaseId)
+    {
         $purchaseDetail = "";
         $purchaseDetail = PurchaseDetails::where('purchase_id', $purchaseId)->get();
-        $purchaseDetail->map(function($detail, $key) {
+        $purchaseDetail->map(function ($detail, $key) {
             $batch = Batch::find($detail->id);
             $batch->product = Product::with(
                 'brand:id,name',
                 'presentation:id,presentation',
                 'unitMeasurement:id,unit_measurement'
-                )->where('id',$batch->product_id)->first();
+            )->where('id', $batch->product_id)->first();
             $detail->batch = $batch;
         });
 
