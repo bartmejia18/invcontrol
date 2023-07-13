@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Purchases extends Model
 {
@@ -15,4 +16,8 @@ class Purchases extends Model
         'date',
         'total'
     ];
+
+    public function supplier(): HasOne {
+        return $this->hasOne(Supplier::class, 'id', 'supplier_id');
+    }
 }
