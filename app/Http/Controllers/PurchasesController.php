@@ -67,7 +67,7 @@ class PurchasesController extends Controller
                 'supplier_id' => $request->input('supplierId'),
                 'date' => $request->input('date'),
                 'total' => $request->input('total'),
-                'status' => 1
+                'status' => true
             ]);
 
 
@@ -187,7 +187,7 @@ class PurchasesController extends Controller
             $purchase = Purchases::find($id);
 
             if ($purchase) {
-                $purchase->status = 0;
+                $purchase->status = false;
 
                 $details = PurchaseDetails::where('purchase_id', $purchase->id)->get();
 

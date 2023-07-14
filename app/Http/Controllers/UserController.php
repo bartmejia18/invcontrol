@@ -147,7 +147,7 @@ class UserController extends Controller
             $user = User::find($id);
 
             if ($user) {
-                $user->status = 0;
+                $user->status = false;
                 
                 if ($user->save()) {
                     DB::commit();
