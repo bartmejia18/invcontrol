@@ -70,7 +70,7 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        return response()->json(User::with('rol:id,name')->find($id), $this->statusCode);
+        return response()->json(User::with('rol:id,rol')->find($id), $this->statusCode);
     }
 
     /**
