@@ -65,6 +65,7 @@ class SalesController extends Controller {
                 'customer' => $request->input('customer'),
                 'date' => $request->input('date'),
                 'total' => $request->input('total'),
+                'status' => 1
 
             ]);
 
@@ -164,8 +165,6 @@ class SalesController extends Controller {
 
             if ($record->save()) {
 
-                
-
                 $this->statusCode   =   201;
                 $this->result       =   true;
                 $this->message      =   "Se ha editado correctamente el registro";
@@ -195,7 +194,53 @@ class SalesController extends Controller {
      */
     public function destroy($id)
     {
-        return Sale::find($id)->delete();
+        try {
+            DB::beginTransaction();
+            $sale = Sale::find($id);
+
+            if ($sale) {
+                $sale->status = 0;
+
+                $detail = SaleDetails::where('sale_id', $sale->id)->get();
+
+                $detail->map(function($item, $key) {
+                    $batchs = Batch::where('product_id', $item->product_id)->get();
+                    $batchsEmpty = $batchs->filter(function($item) {return $item->stock == 0;});
+                    $batchsNoEmpty = $batchs->filter(function($item) {return $item->stock != 0;});
+                    if ($batchsEmpty->count() > 0) {
+                        $lastBatch = $batchsEmpty->last();
+                        $lastBatch->stock = $lastBatch->stock + $item->quantity;
+                        $lastBatch->save();
+                    } else if ($batchsNoEmpty->count() > 0){
+                        $firstBatch = $batchsNoEmpty->first();
+                        $firstBatch->stock = $firstBatch->stock + $item->quantity;
+                        $firstBatch->save();
+                    }
+
+                });
+                
+                if ($sale->save()) {
+                    DB::commit();
+                    $this->statusCode   =   201;
+                    $this->result       =   true;
+                    $this->message      =   "Se ha eliminado el registro correctamente";
+                }
+            } else {
+                throw new \Exception("No se encontró el registro");
+            }
+        } catch (Exception $e) {
+            DB::rollBack();
+            $this->statusCode   = 200;
+            $this->result       = false;
+            $this->message      = env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al eliminar el registro";
+        } finally {
+            $response = [
+                'result'    => $this->result,
+                'message'   => $this->message,
+                'records'   => $this->records,
+            ];
+            return response()->json($response, $this->statusCode);
+        }
     }
 
     public function getSales(Request $request) {

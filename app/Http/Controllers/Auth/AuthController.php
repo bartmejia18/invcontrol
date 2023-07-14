@@ -16,8 +16,9 @@ class AuthController extends Controller
     public function register(Request $request) {
         $validator = Validator::make($request->all(), [
             'name' => 'required|max:255',
-            'email' => 'required|max:255|unique:users',
-            'password' => 'required|min:6|confirmed'
+            'user' => 'required|max:255|unique:users',
+            'password' => 'required|min:6|confirmed',
+            'rol_id' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -25,11 +26,15 @@ class AuthController extends Controller
         } else {
             $user = User::create([
                 'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password)
+                'user' => $request->email,
+                'password' => Hash::make($request->password),
+                'rol_id' => $request->rolId,
+                'status' => 1
             ]);
 
-            $token  = JWTAuth::fromUser($user);
+            $newUser = User::with('rol:id,name')->find($user->id);
+
+            $token  = JWTAuth::fromUser($newUser);
 
             return response()->json([
                 'user' => $user,

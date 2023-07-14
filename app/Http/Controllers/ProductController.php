@@ -48,8 +48,9 @@ class ProductController extends Controller
                 $this->result       = true;
                 $this->message      = "Registro consultados exitosamente";
                 $this->records      = $products;
-            } else
+            } else {
                 throw new \Exception("No se encontraron registros");
+            }
         } catch (\Exception $e) {
             $this->statusCode = 200;
             $this->result = false;

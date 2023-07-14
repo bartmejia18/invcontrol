@@ -66,7 +66,8 @@ class PurchasesController extends Controller
             $newPurchase = Purchases::create([
                 'supplier_id' => $request->input('supplierId'),
                 'date' => $request->input('date'),
-                'total' => $request->input('total')
+                'total' => $request->input('total'),
+                'status' => 1
             ]);
 
 
@@ -181,7 +182,41 @@ class PurchasesController extends Controller
      */
     public function destroy($id)
     {
-        return Purchases::find($id)->delete();
+        try {
+            DB::beginTransaction();
+            $purchase = Purchases::find($id);
+
+            if ($purchase) {
+                $purchase->status = 0;
+
+                $details = PurchaseDetails::where('purchase_id', $purchase->id)->get();
+
+                $details->map(function($item, $key) {
+                    Batch::find($item->batch_id)->delete();
+                });
+                
+                if ($purchase->save()) {
+                    DB::commit();
+                    $this->statusCode   =   201;
+                    $this->result       =   true;
+                    $this->message      =   "Se ha eliminado el registro correctamente";
+                }
+            } else {
+                throw new \Exception("No se encontró el registro");
+            }
+        } catch (Exception $e) {
+            DB::rollBack();
+            $this->statusCode   = 200;
+            $this->result       = false;
+            $this->message      = env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al eliminar el registro";
+        } finally {
+            $response = [
+                'result'    => $this->result,
+                'message'   => $this->message,
+                'records'   => $this->records,
+            ];
+            return response()->json($response, $this->statusCode);
+        }
     }
 
     public function getPurchases(Request $request)

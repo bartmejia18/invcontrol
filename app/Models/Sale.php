@@ -14,7 +14,8 @@ class Sale extends Model
     protected $fillable = [
         'customer',
         'date',
-        'total'
+        'total',
+        'status'
     ];
 
     public function details(): HasMany {
