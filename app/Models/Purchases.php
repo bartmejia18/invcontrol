@@ -14,7 +14,8 @@ class Purchases extends Model
     protected $fillable = [
         'supplier_id',
         'date',
-        'total'
+        'total',
+        'status'
     ];
 
     public function supplier(): HasOne {
