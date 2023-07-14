@@ -99,6 +99,7 @@ class SalesController extends Controller {
                         SaleDetails::create([
                             "sale_id" => $newSale->id,
                             "product_id" => $detail['productId'],
+                            "price" => $detail['price'],
                             "quantity" => $detail['quantity'],
                             "subtotal" => $detail['subtotal']    
                         ]);
