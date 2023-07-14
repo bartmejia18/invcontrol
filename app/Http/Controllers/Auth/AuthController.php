@@ -32,7 +32,7 @@ class AuthController extends Controller
                 'status' => 1
             ]);
 
-            $newUser = User::with('rol:id,name')->find($user->id);
+            $newUser = User::with('rol:id,rol')->find($user->id);
 
             $token  = JWTAuth::fromUser($newUser);
 
