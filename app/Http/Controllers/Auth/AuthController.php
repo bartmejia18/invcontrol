@@ -26,9 +26,9 @@ class AuthController extends Controller
         } else {
             $user = User::create([
                 'name' => $request->name,
-                'user' => $request->email,
+                'user' => $request->user,
                 'password' => Hash::make($request->password),
-                'rol_id' => $request->rolId,
+                'rol_id' => $request->rol_id,
                 'status' => 1
             ]);
 
@@ -45,7 +45,7 @@ class AuthController extends Controller
 
     public function login(Request $request) {
         $validator = Validator::make($request->all(), [
-            'email' => 'required',
+            'user' => 'required',
             'password' => 'required|min:6'
         ]);
 
