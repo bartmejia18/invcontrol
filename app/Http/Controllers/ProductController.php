@@ -104,7 +104,7 @@ class ProductController extends Controller
                 'presentation_id' => $request->input('presentationId'),
                 'unit_measurement_id' => $request->input('unitMeasurementId'),
                 'image' => $pathImage,
-                'status' => true
+                'status' => 0
             ]);
 
             if (!$newProduct) {
@@ -245,7 +245,7 @@ class ProductController extends Controller
             $product = Product::find($id);
 
             if ($product) {
-                $product->status = false;
+                $product->status = 1;
                 
                 if ($product->save()) {
                     DB::commit();

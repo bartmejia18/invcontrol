@@ -61,7 +61,7 @@ class PresentationController extends Controller
         try {
             $newPresentation = Presentation::create([
                 'presentation' => $request->input('presentation'),
-                'status' => true
+                'status' => 0
             ]);
 
             if (!$newPresentation) {
@@ -157,7 +157,7 @@ class PresentationController extends Controller
             $presentation = Presentation::find($id);
 
             if ($presentation) {
-                $presentation->status = false;
+                $presentation->status = 1;
                 
                 if ($presentation->save()) {
                     DB::commit();
