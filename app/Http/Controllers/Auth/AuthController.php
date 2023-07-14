@@ -29,7 +29,7 @@ class AuthController extends Controller
                 'user' => $request->user,
                 'password' => Hash::make($request->password),
                 'rol_id' => $request->rol_id,
-                'status' => 1
+                'status' => 0
             ]);
 
             $newUser = User::with('rol:id,rol')->find($user->id);

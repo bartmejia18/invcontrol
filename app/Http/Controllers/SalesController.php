@@ -65,7 +65,7 @@ class SalesController extends Controller {
                 'customer' => $request->input('customer'),
                 'date' => $request->input('date'),
                 'total' => $request->input('total'),
-                'status' => true
+                'status' => 0
 
             ]);
 
@@ -200,7 +200,7 @@ class SalesController extends Controller {
             $sale = Sale::find($id);
 
             if ($sale) {
-                $sale->status = false;
+                $sale->status = 1;
 
                 $detail = SaleDetails::where('sale_id', $sale->id)->get();
 
