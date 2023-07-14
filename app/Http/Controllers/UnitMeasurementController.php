@@ -61,7 +61,7 @@ class UnitMeasurementController extends Controller
         try {
             $newUnit = UnitMeasurement::create([
                 'unit_measurement' => $request->input('unitMeasurement'),
-                'status' => 1
+                'status' => true
             ]);
 
             if (!$newUnit) {
@@ -157,7 +157,7 @@ class UnitMeasurementController extends Controller
             $unitMeasurement = UnitMeasurement::find($id);
 
             if ($unitMeasurement) {
-                $unitMeasurement->status = 0;
+                $unitMeasurement->status = false;
                 
                 if ($unitMeasurement->save()) {
                     DB::commit();
