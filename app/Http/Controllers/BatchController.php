@@ -69,8 +69,8 @@ class BatchController extends Controller
                 'manufacturing_date' => $request->input('manufacturingDate'),
                 'expiration_date' => $request->input('expirationDate'),
                 'stock' => $request->input('stock'),
-                'price' => $request->input('price'),
-                'cost' => $request->input('cost')
+                'cost' => $request->input('cost'),
+                'subtotal' => $request->input('subtotal'),
             ]);
 
             if (!$newBatch) {
