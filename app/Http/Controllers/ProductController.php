@@ -100,6 +100,7 @@ class ProductController extends Controller
                 'name' => $request->input('name'),
                 'brand_id' => $request->input('brandId'),
                 'price' => $request->input('price'),
+                'cost' => $request->input('cost'),
                 'presentation_id' => $request->input('presentationId'),
                 'unit_measurement_id' => $request->input('unitMeasurementId'),
                 'image' => $pathImage,
@@ -191,6 +192,7 @@ class ProductController extends Controller
             $record->presentation_id = $request->input('presentationId', $record->presentation_id);
             $record->unit_measurement_id = $request->input('unitMeasurementId', $record->unit_measurement_id);
             $record->price = $request->input('price', $record->price);
+            $record->cost = $request->input('cost', $record->cost);
             $record->status = $request->input('status', $record->status);
 
             if ($pathImage != "" ) {

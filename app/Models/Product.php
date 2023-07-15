@@ -16,6 +16,8 @@ class Product extends Model
         'name',
         'brand_id',
         'price',
+        'cost',
+        'stock',
         'presentation_id',
         'unit_measurement_id',
         'image',
