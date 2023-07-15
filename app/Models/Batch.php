@@ -15,7 +15,9 @@ class Batch extends Model
         'product_id',
         'manufacturing_date',
         'expiration_date',
-        'stock'
+        'stock',
+        'cost',
+        'subtotal'
     ];
 
     public function product(): HasOne{  
