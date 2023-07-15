@@ -10,6 +10,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchasesController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\SalesController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UnitMeasurementController;
 use App\Http\Controllers\UserController;
 use App\Models\Brand;
@@ -38,6 +39,7 @@ Route::resource('sales',  SalesController::class);
 Route::resource('unitMeasurement',  UnitMeasurementController::class);
 Route::resource('users',  UserController::class);
 Route::resource('roles',  RolesController::class);
+Route::resource('supplier',  SupplierController::class);
 
 Route::get('searchProduct',  [ProductController::class, 'search']);
 Route::get('getSales',  [SalesController::class, 'getSales']);
