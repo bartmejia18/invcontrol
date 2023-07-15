@@ -279,7 +279,7 @@ class ProductController extends Controller
                 'brand:id,name',
                 'presentation:id,presentation',
                 'unitMeasurement:id,unit_measurement'
-                )->where('status', 1)->where('name', 'LIKE', "%{$search}%")->get();
+                )->where('status', 0)->where('name', 'LIKE', "%{$search}%")->get();
 
             if ($products) {
                 $products->map(function($product, $key) {
