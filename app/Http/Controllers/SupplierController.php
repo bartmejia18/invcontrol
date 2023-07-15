@@ -151,4 +151,30 @@ class SupplierController extends Controller
     {
         return Supplier::find($id)->delete();
     }
+
+    public function search(Request $request) {
+        try {
+            $search = $request->input('search');
+            $suppliers = Supplier::where('name', 'LIKE', "%{$search}%")->get();
+
+            if ($suppliers) {
+                $this->statusCode   = 200;
+                $this->result       = true;
+                $this->message      = "Registro consultados exitosamente";
+                $this->records      = $suppliers;
+            } else
+                throw new \Exception("No se encontraron registros");
+        } catch (\Exception $e) {
+            $this->statusCode = 200;
+            $this->result = false;
+            $this->message = env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al consultar los datos";
+        } finally {
+            $response = [
+                'result'    => $this->result,
+                'message'   => $this->message,
+                'records'   => $this->records,
+            ];
+            return response()->json($response, $this->statusCode);
+        }
+    }
 }
