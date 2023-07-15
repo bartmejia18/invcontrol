@@ -82,7 +82,9 @@ class PurchasesController extends Controller
                         'product_id' => $item['productId'],
                         'manufacturing_date' => $item['manufacturingDate'],
                         'expiration_date' => $item['expirationDate'],
-                        'stock' => $item['stock']
+                        'stock' => $item['stock'],
+                        'cost' => $item['cost'],
+                        'subtotal' => $item['subtotal']
                     ]);
 
                     if ($newBatch) {
