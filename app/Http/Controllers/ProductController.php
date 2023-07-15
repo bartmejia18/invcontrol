@@ -35,13 +35,16 @@ class ProductController extends Controller
                     $product->stock = Batch::select(
                         'id', 
                         'stock',
+                        'cost',
                         'manufacturing_date',
                         'expiration_date')
                         ->where('product_id', $product->id)
                         ->where('stock','>',0)
+                        ->orderBy('created_at', 'asc')
                         ->get();
                         
                     $product->totalStock = $product->stock->sum('stock');
+                    $product->cost = $product->stock->pluck('cost')->first() ? $product->stock->pluck('cost')->first() : 0;
                 });
 
                 $this->statusCode   = 200;
@@ -100,7 +103,6 @@ class ProductController extends Controller
                 'name' => $request->input('name'),
                 'brand_id' => $request->input('brandId'),
                 'price' => $request->input('price'),
-                'cost' => $request->input('cost'),
                 'presentation_id' => $request->input('presentationId'),
                 'unit_measurement_id' => $request->input('unitMeasurementId'),
                 'image' => $pathImage,
@@ -192,7 +194,6 @@ class ProductController extends Controller
             $record->presentation_id = $request->input('presentationId', $record->presentation_id);
             $record->unit_measurement_id = $request->input('unitMeasurementId', $record->unit_measurement_id);
             $record->price = $request->input('price', $record->price);
-            $record->cost = $request->input('cost', $record->cost);
             $record->status = $request->input('status', $record->status);
 
             if ($pathImage != "" ) {
@@ -287,8 +288,12 @@ class ProductController extends Controller
                         'id', 
                         'stock',
                         'manufacturing_date',
-                        'expiration_date')->where('product_id', $product->id)->get();
+                        'expiration_date')
+                        ->where('product_id', $product->id)
+                        ->orderBy('created_at', 'asc')
+                        ->get();
                     $product->totalStock = $product->stock->sum('stock');
+                    $product->cost = $product->stock->pluck('cost')->first() ? $product->stock->pluck('cost')->first() : 0;
                 });
 
                 $this->statusCode   = 200;
