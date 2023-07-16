@@ -18,7 +18,7 @@ class PresentationController extends Controller
     public function index()
     {
         try {
-            $presentation = Presentation::where('status',1)->get();
+            $presentation = Presentation::where('status',0)->get();
             if ($presentation) {
                 $this->statusCode   = 200;
                 $this->result       = true;

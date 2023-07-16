@@ -27,7 +27,7 @@ class ProductController extends Controller
                 'brand:id,name',
                 'presentation:id,presentation',
                 'unitMeasurement:id,unit_measurement'
-                )->where('status', true)->get();
+                )->where('status', 0)->get();
 
             if ($products) {
                 

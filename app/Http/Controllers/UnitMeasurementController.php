@@ -18,7 +18,7 @@ class UnitMeasurementController extends Controller
     public function index()
     {
         try {
-            $unit = UnitMeasurement::where('status', 1)->get();
+            $unit = UnitMeasurement::where('status', 0)->get();
             if ($unit) {
                 $this->statusCode   = 200;
                 $this->result       = true;
