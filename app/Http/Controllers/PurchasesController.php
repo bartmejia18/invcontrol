@@ -276,7 +276,7 @@ class PurchasesController extends Controller
         $purchaseDetail = "";
         $purchaseDetail = PurchaseDetails::where('purchase_id', $purchaseId)->get();
         $purchaseDetail->map(function ($detail, $key) {
-            $batch = Batch::find($detail->id);
+            $batch = Batch::find($detail->batch_id);
             $batch->product = Product::with(
                 'brand:id,name',
                 'presentation:id,presentation',
