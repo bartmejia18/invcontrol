@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Brand;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BrandController extends Controller
 {
@@ -59,7 +60,8 @@ class BrandController extends Controller
     {
         try {
             $newBrand = Brand::create([
-                'name' => $request->input('name')
+                'name' => $request->input('name'),
+                'status' => 0
             ]);
 
             if (!$newBrand) {
@@ -119,6 +121,8 @@ class BrandController extends Controller
             $record = Brand::find($id);
 
             $record->name = $request->input('name', $record->name);
+            $record->status = $request->input('status', $record->status);
+
             if ($record->save()) {
                 $this->statusCode   =   201;
                 $this->result       =   true;
@@ -149,6 +153,34 @@ class BrandController extends Controller
      */
     public function destroy($id)
     {
-        return Brand::find($id)->delete();
+        try {
+            DB::beginTransaction();
+            $brand = Brand::find($id);
+
+            if ($brand) {
+                $brand->status = 1;
+                
+                if ($brand->save()) {
+                    DB::commit();
+                    $this->statusCode   =   201;
+                    $this->result       =   true;
+                    $this->message      =   "Se ha eliminado el registro correctamente";
+                }
+            } else {
+                throw new \Exception("No se encontró el registro");
+            }
+        } catch (Exception $e) {
+            DB::rollBack();
+            $this->statusCode   = 200;
+            $this->result       = false;
+            $this->message      = env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al eliminar el registro";
+        } finally {
+            $response = [
+                'result'    => $this->result,
+                'message'   => $this->message,
+                'records'   => $this->records,
+            ];
+            return response()->json($response, $this->statusCode);
+        }
     }
 }

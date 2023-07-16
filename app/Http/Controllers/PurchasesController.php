@@ -224,7 +224,6 @@ class PurchasesController extends Controller
     public function getPurchases(Request $request)
     {
         $purchases = new Purchases();
-
         switch ($request->input('type')) {
             case 1:
                 $purchases = Purchases::with('supplier:id,name')->where('date', $request->input('startDate'))->get();
