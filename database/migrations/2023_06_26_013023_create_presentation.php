@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('presentation', function (Blueprint $table) {
             $table->id();
             $table->string('presentation');
+            $table->boolean('status');
             $table->timestamps();
         });
     }

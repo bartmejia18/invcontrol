@@ -20,7 +20,7 @@ class UserController extends Controller
     public function index()
     {
         try {
-            $users = User::with('rol:id,rol')->all();
+            $users = User::with('rol')->get();
             if ($users) {
                 $this->statusCode   = 200;
                 $this->result       = true;
@@ -95,10 +95,10 @@ class UserController extends Controller
     {
         try {
             DB::beginTransaction();
-            $user = User::find( $id );
+            $user = User::find($id);
 
             if ($user) {
-                $user->name = $request->input('nombre', $user->name);
+                $user->name = $request->input('name', $user->name);
                 $user->user = strtolower($request->input('user', $user->user));
                 $user->rol_id = $request->input('rolId', $user->rol_id);
                 $user->status = $request->input('status', $user->status);
