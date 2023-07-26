@@ -13,11 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('unit_measurement', function (Blueprint $table) {
+        Schema::create('product_unit', function (Blueprint $table) {
             $table->id();
-            $table->string('unit_measurement');
-            $table->integer('value');
-            $table->boolean('status');
+            $table->integer('product_id');
+            $table->integer('unidad_id');
+            $table->integer('price');
             $table->timestamps();
         });
     }
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('unit_measurement');
+        Schema::dropIfExists('product_unit');
     }
 };

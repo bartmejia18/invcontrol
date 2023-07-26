@@ -18,7 +18,9 @@ return new class extends Migration
             $table->integer('product_id');
             $table->date('manufacturing_date');
             $table->date('expiration_date');
+            $table->double('cost');
             $table->integer('stock');
+            $table->double('subtotal');
             $table->timestamps();
         });
     }

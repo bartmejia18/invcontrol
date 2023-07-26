@@ -3,18 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Batch;
-use App\Models\Brand;
-use App\Models\Presentation;
 use App\Models\Product;
-use App\Models\UnitMeasurement;
+use App\Models\ProductUnit;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-
     private $statusCode = 200;
     private $result = false;
     private $message = '';
@@ -24,27 +20,18 @@ class ProductController extends Controller
     {
         try {
             $products = Product::with(
-                'brand:id,name',
-                'presentation:id,presentation',
-                'unitMeasurement:id,unit_measurement'
-                )->where('status', 0)->get();
+                    'brand:id,name',
+                    'presentation:id,presentation'
+                )
+                ->where('status', 0)
+                ->get();
 
             if ($products) {
-                
                 $products->map(function($product, $key) {
-                    $product->stock = Batch::select(
-                        'id', 
-                        'stock',
-                        'cost',
-                        'manufacturing_date',
-                        'expiration_date')
-                        ->where('product_id', $product->id)
-                        ->where('stock','>',0)
-                        ->orderBy('created_at', 'asc')
-                        ->get();
-                        
+                    $product->stock = $this->getStockInBatchs($product->id);
                     $product->totalStock = $product->stock->sum('stock');
                     $product->cost = $product->stock->pluck('cost')->first() ? $product->stock->pluck('cost')->first() : 0;
+                    $product->unitMeasurement = $this->getUnitMeasurements($product->id);
                 });
 
                 $this->statusCode   = 200;
@@ -102,9 +89,8 @@ class ProductController extends Controller
             $newProduct = Product::create([
                 'name' => $request->input('name'),
                 'brand_id' => $request->input('brandId'),
-                'price' => $request->input('price'),
+                'cost' => $request->input('cost'),
                 'presentation_id' => $request->input('presentationId'),
-                'unit_measurement_id' => $request->input('unitMeasurementId'),
                 'image' => $pathImage,
                 'status' => 0
             ]);
@@ -112,15 +98,26 @@ class ProductController extends Controller
             if (!$newProduct) {
                 throw new \Exception("Ocurrió un problema guardar el registro. Por favor inténtelo nuevamente");
             } else {
-                
+
+                $requestProductsUnit = json_decode($request->input('productsUnit'), true);
+                foreach ($requestProductsUnit as $item) {
+                    ProductUnit::create([
+                        'product_id' => $newProduct->id,
+                        'unit_measurement_id' => $item['unitMeasurementId'],
+                        'price' => $item['price'],
+                        'status' => 0
+                    ]);
+                }
+
                 $product = Product::with(
-                    'brand:id,name',
-                    'presentation:id,presentation',
-                    'unitMeasurement:id,unit_measurement'
+                        'brand:id,name',
+                        'presentation:id,presentation',
+                        'unitMeasurement:id,unit_measurement'
                     )
                     ->where('id', $newProduct->id)
                     ->first();
 
+                $product->unitMeasurement = $this->getUnitMeasurements($product->id);
                 $product->totalStock = 0;
 
                 DB::commit();
@@ -128,7 +125,7 @@ class ProductController extends Controller
                 $this->result       =   true;
                 $this->message      =   "Se ha guardado correctamente el registro";
                 $this->records      =   $product;
-            }
+            }   
         } catch (\Exception $e) {
             DB::rollBack();
             $this->statusCode   =   200;
@@ -192,8 +189,7 @@ class ProductController extends Controller
             $record->name = $request->input('name', $record->name);
             $record->brand_id = $request->input('brandId', $record->brand_id);
             $record->presentation_id = $request->input('presentationId', $record->presentation_id);
-            $record->unit_measurement_id = $request->input('unitMeasurementId', $record->unit_measurement_id);
-            $record->price = $request->input('price', $record->price);
+            $record->cost = $request->input('cost', $record->cost);
             $record->status = $request->input('status', $record->status);
 
             if ($pathImage != "" ) {
@@ -201,14 +197,33 @@ class ProductController extends Controller
             }
 
             if ($record->save()) {
+                
+                $requestProductsUnit = json_decode($request->input('productsUnit'), true);
+
+                if ($requestProductsUnit != null && !empty($requestProductsUnit)) {
+                    
+                    ProductUnit::where('product_id', $record->id)->delete();
+
+                    foreach ($requestProductsUnit as $item) {
+                        ProductUnit::create([
+                            'product_id' => $record->id,
+                            'unit_measurement_id' => $item['unitMeasurementId'],
+                            'price' => $item['price']
+                        ]);
+                    }
+                }
 
                 $product = Product::with(
-                    'brand:id,name',
-                    'presentation:id,presentation',
-                    'unitMeasurement:id,unit_measurement'
+                        'brand:id,name',
+                        'presentation:id,presentation',
                     )
                     ->where('id', $record->id)
                     ->first();
+
+                $product->unitMeasurement = $this->getUnitMeasurements($product->id);
+                $product->stock = $this->getStockInBatchs($product->id);
+                $product->totalStock = $product->stock->sum('stock');
+                $product->cost = $product->stock->pluck('cost')->first() ? $product->stock->pluck('cost')->first() : 0;
 
                 DB::commit();
                 $this->statusCode   =   201;
@@ -277,23 +292,19 @@ class ProductController extends Controller
 
             $search = $request->input('search');
             $products = Product::with(
-                'brand:id,name',
-                'presentation:id,presentation',
-                'unitMeasurement:id,unit_measurement'
-                )->where('status', 0)->where('name', 'LIKE', "%{$search}%")->get();
+                    'brand:id,name',
+                    'presentation:id,presentation'
+                )
+                ->where('status', 0)
+                ->where('name', 'LIKE', "%{$search}%")
+                ->get();
 
             if ($products) {
                 $products->map(function($product, $key) {
-                    $product->stock = Batch::select(
-                        'id', 
-                        'stock',
-                        'manufacturing_date',
-                        'expiration_date')
-                        ->where('product_id', $product->id)
-                        ->orderBy('created_at', 'asc')
-                        ->get();
+                    $product->stock = $this->getStockInBatchs($product->id);
                     $product->totalStock = $product->stock->sum('stock');
                     $product->cost = $product->stock->pluck('cost')->first() ? $product->stock->pluck('cost')->first() : 0;
+                    $product->unitMeasurement = $this->getUnitMeasurements($product->id);
                 });
 
                 $this->statusCode   = 200;
@@ -315,5 +326,35 @@ class ProductController extends Controller
             return response()->json($response, $this->statusCode);
         }
 
+    }
+
+    public function getUnitMeasurements($productId) {
+
+        $productsUnit = DB::table('unit_measurement')
+                            ->rightJoin('product_unit', 'unit_measurement.id', '=', 'product_unit.unit_measurement_id')
+                            ->where('product_unit.product_id', $productId)
+                            ->get();
+
+       return $productsUnit->map(function($item, $key) {
+            return [
+                'price' => $item->price,
+                'unit_measurement' => $item->unit_measurement,
+                'value' => $item->value
+            ];
+        });
+    }
+
+    public function getStockInBatchs($productId) {
+        return Batch::select(
+                'id', 
+                'stock',
+                'cost',
+                'manufacturing_date',
+                'expiration_date'
+            )
+            ->where('product_id', $productId)
+            ->where('stock','>',0)
+            ->orderBy('created_at', 'asc')
+            ->get();
     }
 }

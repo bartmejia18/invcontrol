@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('customer');
             $table->date('date');
             $table->float('total');
+            $table->boolean('status');
             $table->timestamps();
         });
     }
