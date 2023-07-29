@@ -89,7 +89,6 @@ class ProductController extends Controller
             $newProduct = Product::create([
                 'name' => $request->input('name'),
                 'brand_id' => $request->input('brandId'),
-                'cost' => $request->input('cost'),
                 'presentation_id' => $request->input('presentationId'),
                 'image' => $pathImage,
                 'status' => 0
@@ -189,7 +188,6 @@ class ProductController extends Controller
             $record->name = $request->input('name', $record->name);
             $record->brand_id = $request->input('brandId', $record->brand_id);
             $record->presentation_id = $request->input('presentationId', $record->presentation_id);
-            $record->cost = $request->input('cost', $record->cost);
             $record->status = $request->input('status', $record->status);
 
             if ($pathImage != "" ) {
