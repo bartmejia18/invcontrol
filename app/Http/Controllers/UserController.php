@@ -20,7 +20,7 @@ class UserController extends Controller
     public function index()
     {
         try {
-            $users = User::with('rol')->get();
+            $users = User::with('rol')->where('status', 0)->get();
             if ($users) {
                 $this->statusCode   = 200;
                 $this->result       = true;
