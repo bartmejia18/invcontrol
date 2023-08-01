@@ -336,7 +336,7 @@ class ProductController extends Controller
        return $productsUnit->map(function($item, $key) {
             return [
                 'price' => $item->price,
-                'unit_measurment_id' => $item->unit_measurement_id,
+                'unit_measurement_id' => $item->unit_measurement_id,
                 'unit_measurement' => $item->unit_measurement,
                 'value' => $item->value
             ];
