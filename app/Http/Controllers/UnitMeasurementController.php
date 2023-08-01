@@ -184,4 +184,35 @@ class UnitMeasurementController extends Controller
             return response()->json($response, $this->statusCode);
         }
     }
+
+    public function search(Request $request) {
+        try {
+            $search = $request->input('search');
+            $unitMeasurement = UnitMeasurement::select('id', 'unit_measurement', 'value')
+                ->where('status', 0)
+                ->where('unit_measurement', 'LIKE', "%{$search}%")
+                ->get();
+
+            if ($unitMeasurement) {
+                $this->statusCode   = 200;
+                $this->result       = true;
+                $this->message      = "Registro consultados exitosamente";
+                $this->records      = $unitMeasurement;
+            } else {
+                throw new \Exception("No se encontraron registros");
+            }
+        } catch (\Exception $e) {
+            $this->statusCode = 200;
+            $this->result = false;
+            $this->message = env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al consultar los datos";
+        } finally {
+            $response = [
+                'result'    => $this->result,
+                'message'   => $this->message,
+                'records'   => $this->records,
+            ];
+            return response()->json($response, $this->statusCode);
+        }
+
+    }
 }

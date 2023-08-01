@@ -15,6 +15,7 @@ use App\Http\Controllers\UnitMeasurementController;
 use App\Http\Controllers\UserController;
 use App\Models\Brand;
 use App\Models\Supplier;
+use App\Models\UnitMeasurement;
 use App\Models\User;
 
 /*
@@ -44,5 +45,6 @@ Route::resource('supplier',  SupplierController::class);
 
 Route::get('searchProduct',  [ProductController::class, 'search']);
 Route::get('searchSupplier',  [SupplierController::class, 'search']);
+Route::get('searchUnitMeasurement',  [UnitMeasurementController::class, 'search']);
 Route::get('getSales',  [SalesController::class, 'getSales']);
 Route::get('getPurchases',  [PurchasesController::class, 'getPurchases']);
