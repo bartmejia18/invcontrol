@@ -302,7 +302,7 @@ class ProductController extends Controller
                     $product->stock = $this->getStockInBatchs($product->id);
                     $product->totalStock = $product->stock->sum('stock');
                     $product->cost = $product->stock->pluck('cost')->first() ? $product->stock->pluck('cost')->first() : 0;
-                    $product->unit_measurement = $this->getUnitMeasurements($product->id);
+                    $product->productsUnit = $this->getUnitMeasurements($product->id);
                 });
 
                 $this->statusCode   = 200;
