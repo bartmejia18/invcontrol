@@ -143,7 +143,31 @@ class SalesController extends Controller {
      */
     public function show($id)
     {
-        return response()->json(Sale::find($id), $this->statusCode);
+        try {
+            $sale = Sale::find($id);
+            if ($sale) {
+                
+                $sale->details = $this->getDetailsSales($sale->id);
+
+                $this->statusCode   =   201;
+                $this->result       =   true;
+                $this->message      =   "Registro consultado exitosamente";
+                $this->records      =   $sale;
+            } else {
+                throw new \Exception("No se encontraron registros");
+            }
+        } catch (Exception $e) {
+            $this->statusCode   = 200;
+            $this->result       = false;
+            $this->message      = env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al consultar los datos";
+        } finally {
+            $response = [
+                'result'    => $this->result,
+                'message'   => $this->message,
+                'records'   => $this->records,
+            ];
+            return response()->json($response, $this->statusCode);
+        }
     }
 
     /**

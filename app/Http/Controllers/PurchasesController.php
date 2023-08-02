@@ -126,7 +126,31 @@ class PurchasesController extends Controller
      */
     public function show($id)
     {
-        return response()->json(Purchases::find($id), $this->statusCode);
+        try {
+            $purchase = Purchases::with('supplier:id,name')->find($id);
+            if ($purchase) {
+                
+                $purchase->details = $this->getDetailsPurchases($purchase->id);
+
+                $this->statusCode   =   201;
+                $this->result       =   true;
+                $this->message      =   "Registro consultado exitosamente";
+                $this->records      =   $purchase;
+            } else {
+                throw new \Exception("No se encontraron registros");
+            }
+        } catch (Exception $e) {
+            $this->statusCode   = 200;
+            $this->result       = false;
+            $this->message      = env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al consultar los datos";
+        } finally {
+            $response = [
+                'result'    => $this->result,
+                'message'   => $this->message,
+                'records'   => $this->records,
+            ];
+            return response()->json($response, $this->statusCode);
+        }
     }
 
     /**
@@ -249,7 +273,7 @@ class PurchasesController extends Controller
             case 4:
                 $purchases = Purchases::with('supplier:id,name')->whereBetween('date', [$request->input('startDate'), $request->input('endDate')])->get();
                 $purchases->map(function ($purchase, $key) {
-                    $purchase->details = $this->getDetailsPurchases($purchase);
+                    $purchase->details = $this->getDetailsPurchases($purchase->id);
                 });
                 break;
         }
