@@ -15,6 +15,8 @@ class Sale extends Model
         'customer',
         'date',
         'total',
+        'user_cancel_id',
+        'date_cancel',
         'status'
     ];
 

@@ -224,7 +224,7 @@ class SalesController extends Controller {
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         try {
             DB::beginTransaction();
@@ -232,6 +232,8 @@ class SalesController extends Controller {
 
             if ($sale) {
                 $sale->status = 1;
+                $sale->user_cancel_id = $request->input('userCancelId');
+                $sale->date_cancel = $request->input('dateCancel');
 
                 $detail = SaleDetails::where('sale_id', $sale->id)->get();
 

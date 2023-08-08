@@ -9,6 +9,7 @@ use App\Models\Purchases;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use stdClass;
 
 class PurchasesController extends Controller
 {
@@ -297,7 +298,7 @@ class PurchasesController extends Controller
 
     public function getDetailsPurchases($purchaseId)
     {
-        $purchaseDetail = "";
+        $purchaseDetail = new stdClass();
         $purchaseDetail = PurchaseDetails::where('purchase_id', $purchaseId)->get();
         $purchaseDetail->map(function ($detail, $key) {
             $batch = Batch::find($detail->batch_id);
@@ -305,7 +306,12 @@ class PurchasesController extends Controller
                 'brand:id,name',
                 'presentation:id,presentation'
             )->where('id', $batch->product_id)->first();
-            $detail->batch = $batch;
+            $detail->productId = $batch->product_id;
+            $detail->manufacturingDate = $batch->manufacturing_date;
+            $detail->expirationDate = $batch->expiration_date;
+            $detail->stock = $batch->stock;
+            $detail->cost = $batch->cost;
+            $detail->subtotal = $batch->subtotal;
         });
 
         return $purchaseDetail;
