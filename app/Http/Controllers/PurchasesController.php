@@ -13,7 +13,6 @@ use stdClass;
 
 class PurchasesController extends Controller
 {
-
     private $statusCode = 200;
     private $result = false;
     private $message = '';
@@ -175,19 +174,55 @@ class PurchasesController extends Controller
     public function update(Request $request, $id)
     {
         try {
+            DB::beginTransaction();
             $record = Purchases::find($id);
             $record->date = $request->input('date', $record->date);
             $record->total = $request->input('total', $record->total);
+            $record->supplier_id = $request->input('supplierId', $record->supplier_id);
 
-            if ($record->save()) {
-                $this->statusCode   =   201;
-                $this->result       =   true;
-                $this->message      =   "Se ha editado correctamente el registro";
-                $this->records      =   $record;
-            } else {
-                throw new \Exception("Ocurrió un problema al editar el registro");
+            $requestDetails = json_decode($request->input('details'), true);
+            
+            if ($requestDetails != null && !empty($requestDetails)) {
+                $purchasesDetails = PurchaseDetails::where('purchase_id', $record->id)->get();
+
+                if (count($purchasesDetails) > 0) {
+                    foreach ($purchasesDetails as $detail) {
+                        Batch::where('id', $detail->batch_id)->delete();
+                        PurchaseDetails::find($detail->id)->delete();
+                    }
+                }
+
+                foreach ($requestDetails as $item) {
+
+                    $newBatch = Batch::create([
+                        'product_id' => $item['productId'],
+                        'manufacturing_date' => $item['manufacturingDate'],
+                        'expiration_date' => $item['expirationDate'],
+                        'stock' => $item['stock'],
+                        'cost' => $item['cost'],
+                        'subtotal' => $item['subtotal']
+                    ]);
+
+                    if ($newBatch) {
+                        PurchaseDetails::create([
+                            'purchase_id' => $record->id,
+                            'batch_id' => $newBatch->id
+                        ]);
+
+                        $record->save();
+
+                        DB::commit();
+                        $this->statusCode   =   201;
+                        $this->result       =   true;
+                        $this->message      =   "Se ha guardado correctamente el registro";
+                        $this->records      =   $record;
+                    } else {
+                        throw new \Exception("Ocurrió un problema guardar el registro. Por favor inténtelo nuevamente");
+                    }
+                }
             }
         } catch (Exception $e) {
+            DB::rollBack();
             $this->statusCode   = 200;
             $this->result       = false;
             $this->message      = env('APP_DEBUG') ? $e->getMessage() : "Ocurrió un problema al editar el registro";
@@ -253,13 +288,13 @@ class PurchasesController extends Controller
             case 1:
                 $purchases = Purchases::with('supplier:id,name')->where('date', $request->input('startDate'))->get();
                 $purchases->map(function ($purchase, $key) {
-                    $purchase->details = $this->getDetailsPurchases($purchase->id);
+                    $purchase->details = $this->getDetailsPurchasesWithProduct($purchase->id);
                 });
                 break;
             case 2:
                 $purchases = Purchases::with('supplier:id,name')->whereBetween('date', [$request->input('startDate'), $request->input('endDate')])->get();
                 $purchases->map(function ($purchase, $key) {
-                    $purchase->details = $this->getDetailsPurchases($purchase->id);
+                    $purchase->details = $this->getDetailsPurchasesWithProduct($purchase->id);
                 });
                 break;
             case 3:
@@ -268,13 +303,13 @@ class PurchasesController extends Controller
                 $year = date('Y', $timestamp);
                 $purchases = Purchases::with('supplier:id,name')->whereYear('date', $year)->whereMonth('date', $month)->get();
                 $purchases->map(function ($purchase, $key) {
-                    $purchase->details = $this->getDetailsPurchases($purchase->id);
+                    $purchase->details = $this->getDetailsPurchasesWithProduct($purchase->id);
                 });
                 break;
             case 4:
                 $purchases = Purchases::with('supplier:id,name')->whereBetween('date', [$request->input('startDate'), $request->input('endDate')])->get();
                 $purchases->map(function ($purchase, $key) {
-                    $purchase->details = $this->getDetailsPurchases($purchase->id);
+                    $purchase->details = $this->getDetailsPurchasesWithProduct($purchase->id);
                 });
                 break;
         }
@@ -296,8 +331,7 @@ class PurchasesController extends Controller
         ], $this->statusCode);
     }
 
-    public function getDetailsPurchases($purchaseId)
-    {
+    public function getDetailsPurchases($purchaseId) {
         $purchaseDetail = new stdClass();
         $purchaseDetail = PurchaseDetails::where('purchase_id', $purchaseId)->get();
         $purchaseDetail->map(function ($detail, $key) {
@@ -307,11 +341,27 @@ class PurchasesController extends Controller
                 'presentation:id,presentation'
             )->where('id', $batch->product_id)->first();
             $detail->productId = $batch->product_id;
+            $detail->name = $batch->product->name;
             $detail->manufacturingDate = $batch->manufacturing_date;
             $detail->expirationDate = $batch->expiration_date;
             $detail->stock = $batch->stock;
             $detail->cost = $batch->cost;
             $detail->subtotal = $batch->subtotal;
+        });
+
+        return $purchaseDetail;
+    }
+
+    public function getDetailsPurchasesWithProduct($purchaseId) {
+        $purchaseDetail = "";
+        $purchaseDetail = PurchaseDetails::where('purchase_id', $purchaseId)->get();
+        $purchaseDetail->map(function ($detail, $key) {
+            $batch = Batch::find($detail->batch_id);
+            $batch->product = Product::with(
+                'brand:id,name',
+                'presentation:id,presentation'
+            )->where('id', $batch->product_id)->first();
+            $detail->batch = $batch;
         });
 
         return $purchaseDetail;
