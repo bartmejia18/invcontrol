@@ -172,4 +172,29 @@ class UserController extends Controller
             return response()->json($response, $this->statusCode);
         }
     }
+
+    public function validatePassword(Request $request) {
+        try {
+            $user = User::find($request->input("id"));
+            if ($user && Hash::check($request->input("password"), $user->password)) {
+                $this->message      =   "Credenciales validas";
+                $this->result       =   true;
+                $this->statusCode   =   200;
+            } else {
+                throw new Exception("No se pudo validar el usuario");
+            }
+        } catch (Exception $e) {
+            $this->statusCode = 200;
+            $this->message = env('APP_DEBUG') ? $e->getMessage() : $this->message;
+            $this->result = false;
+        } finally {
+            $response = [
+                'message'   =>  $this->message,
+                'result'    =>  $this->result,
+                'records'   =>  $this->records
+            ];
+            
+            return response()->json($response, $this->statusCode);
+        }
+    }
 }

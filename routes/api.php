@@ -48,3 +48,4 @@ Route::get('searchSupplier',  [SupplierController::class, 'search']);
 Route::get('searchUnitMeasurement',  [UnitMeasurementController::class, 'search']);
 Route::get('getSales',  [SalesController::class, 'getSales']);
 Route::get('getPurchases',  [PurchasesController::class, 'getPurchases']);
+Route::post('validateUser', [UserController::class, 'validatePassword']);
