@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleDetails;
 use App\Models\UnitMeasurement;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -233,7 +234,7 @@ class SalesController extends Controller {
             if ($sale) {
                 $sale->status = 1;
                 $sale->user_cancel_id = $request->input('userCancelId');
-                $sale->date_cancel = $request->input('dateCancel');
+                $sale->date_cancel = Carbon::now()->toDateString();
 
                 $detail = SaleDetails::where('sale_id', $sale->id)->get();
 
