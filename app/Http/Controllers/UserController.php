@@ -175,7 +175,7 @@ class UserController extends Controller
 
     public function validatePassword(Request $request) {
         try {
-            $user = User::find($request->input("id"));
+            $user = User::where('id',$request->input("id"))->where('status', 0)->first();
             if ($user && Hash::check($request->input("password"), $user->password)) {
                 $this->message      =   "Credenciales validas";
                 $this->result       =   true;

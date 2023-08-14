@@ -56,10 +56,15 @@ class AuthController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 422);
         } 
-        if (!$token=auth()->attempt($validator->validated())){
-            return response()->json(['error'=>'Unauthorized', 401]);
+        $user = User::where('user', $request->input('user'))->first();
+        if ($user->status == 0) {
+            if (!$token=auth()->attempt($validator->validated())){
+                return response()->json(['error'=>'No se pudo iniciar sesión, valide el usuario y contraseña', 401]);
+            }
+            return $this->createNewToken($token);
+        } else {
+            return response()->json(['error'=>'El usuario no existe', 401]);
         }
-        return $this->createNewToken($token);
     }
 
     public function createNewToken($token) {

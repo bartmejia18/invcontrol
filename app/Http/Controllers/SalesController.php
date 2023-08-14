@@ -256,9 +256,14 @@ class SalesController extends Controller {
                 
                 if ($sale->save()) {
                     DB::commit();
+
+                    $salesDelete = Sale::find($sale->id);
+                    $salesDelete->details = $this->getDetailsSales($salesDelete->id);
+                    
                     $this->statusCode   =   201;
                     $this->result       =   true;
                     $this->message      =   "Se ha eliminado el registro correctamente";
+                    $this->records      =   $salesDelete;
                 }
             } else {
                 throw new \Exception("No se encontró el registro");
