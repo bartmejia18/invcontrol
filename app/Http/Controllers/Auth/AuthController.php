@@ -63,7 +63,10 @@ class AuthController extends Controller
             }
             return $this->createNewToken($token);
         } else {
-            return response()->json(['error'=>'El usuario no existe', 401]);
+            return response()->json([
+                'result' => false,
+                'message' => "El usuario no existe"
+            ], 401);
         }
     }
 
