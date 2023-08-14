@@ -57,7 +57,7 @@ class AuthController extends Controller
             return response()->json($validator->errors()->toJson(), 422);
         } 
         $user = User::where('user', $request->input('user'))->first();
-        if ($user->status == 0) {
+        if ($user != null && $user->status == 0) {
             if (!$token=auth()->attempt($validator->validated())){
                 return response()->json(['error'=>'No se pudo iniciar sesión, valide el usuario y contraseña', 401]);
             }
