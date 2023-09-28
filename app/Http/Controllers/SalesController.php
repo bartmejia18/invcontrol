@@ -239,16 +239,18 @@ class SalesController extends Controller {
                 $detail = SaleDetails::where('sale_id', $sale->id)->get();
 
                 $detail->map(function($item, $key) {
+                    $unitMeasurement = UnitMeasurement::find($item->unit_measurement_id);
                     $batchs = Batch::where('product_id', $item->product_id)->get();
                     $batchsEmpty = $batchs->filter(function($item) {return $item->stock == 0;});
                     $batchsNoEmpty = $batchs->filter(function($item) {return $item->stock != 0;});
                     if ($batchsEmpty->count() > 0) {
                         $lastBatch = $batchsEmpty->last();
-                        $lastBatch->stock = $lastBatch->stock + $item->quantity;
+                        $lastBatch->stock = $lastBatch->stock + ($item->quantity * $unitMeasurement->value);
                         $lastBatch->save();
-                    } else if ($batchsNoEmpty->count() > 0){
+                    } else if ($batchsNoEmpty->count() > 0) {
                         $firstBatch = $batchsNoEmpty->first();
-                        $firstBatch->stock = $firstBatch->stock + $item->quantity;
+                        var_dump($item->quantity);
+                        $firstBatch->stock = $firstBatch->stock + ($item->quantity * $unitMeasurement->value);
                         $firstBatch->save();
                     }
 
