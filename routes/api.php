@@ -13,6 +13,7 @@ use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UnitMeasurementController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ReportsController;
 use App\Models\Brand;
 use App\Models\Supplier;
 use App\Models\UnitMeasurement;
@@ -49,3 +50,4 @@ Route::get('searchUnitMeasurement',  [UnitMeasurementController::class, 'search'
 Route::get('getSales',  [SalesController::class, 'getSales']);
 Route::get('getPurchases',  [PurchasesController::class, 'getPurchases']);
 Route::post('validateUser', [UserController::class, 'validatePassword']);
+Route::get('getGeneralInfo', [ReportsController::class, 'reportGeneral']);
